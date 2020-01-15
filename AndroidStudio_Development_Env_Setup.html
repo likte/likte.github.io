@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="JDK环境配置如图1首先进入oracle官网下载jdk11安装包">
+<meta name="keywords" content="AndroidStudio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AndroidStudio开发环境搭建">
+<meta property="og:url" content="https://likte.me/AndroidStudio_Development_Env_Setup.html">
+<meta property="og:site_name" content="Likte&#39;s Blog">
+<meta property="og:description" content="JDK环境配置如图1首先进入oracle官网下载jdk11安装包">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/1.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/2.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/3.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/4.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/5.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/6.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/7.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/8.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/9.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/10.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/11.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/12.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/13.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/14.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/15.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/16.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/17.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/18.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/19.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/20.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/21.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/22.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/23.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/24.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/25.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/26.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/27.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/28.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/29.jpg">
+<meta property="og:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/30.jpg">
+<meta property="og:updated_time" content="2019-05-05T07:21:36.219Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AndroidStudio开发环境搭建">
+<meta name="twitter:description" content="JDK环境配置如图1首先进入oracle官网下载jdk11安装包">
+<meta name="twitter:image" content="https://likte.me/AndroidStudio_Development_Env_Setup/1.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Likte's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://likte.me/AndroidStudio_Development_Env_Setup.html">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>AndroidStudio开发环境搭建 | Likte's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Likte's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://likte.me/AndroidStudio_Development_Env_Setup.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Likte">
+      <meta itemprop="description" content="Have you tried your best?">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Likte's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AndroidStudio开发环境搭建
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+		
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-05 11:31:20 / 修改时间：15:21:36" itemprop="dateCreated datePublished" datetime="2019-05-05T11:31:20+08:00">2019-05-05</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/安卓开发/" itemprop="url" rel="index"><span itemprop="name">安卓开发</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <a href="/AndroidStudio_Development_Env_Setup.html#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/AndroidStudio_Development_Env_Setup.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+      
+      
+
+      
+        <h2 id="JDK环境配置"><a href="#JDK环境配置" class="headerlink" title="JDK环境配置"></a>JDK环境配置</h2><p>如图1首先进入oracle官网下载jdk11安装包</p>
+<img src="/AndroidStudio_Development_Env_Setup/1.jpg" title="图1">
+<a id="more"></a>
+<p>注意Oracle JDK许可证已经更新，所以点击下载会跳到图所示的账号登陆页面，只有登录账号后才可下载，如果有Oracle账号的就可以直接登录下载，如果没有就要注册一个Oracle账号了，如果嫌麻烦可以Google一个Oracle账号进行下载</p>
+<img src="/AndroidStudio_Development_Env_Setup/2.jpg" title="图2">
+<p>JDK安装步骤直接默认路径安装下一步即可</p>
+<img src="/AndroidStudio_Development_Env_Setup/3.jpg" title="图3">
+<p>然后配置JDK环境变量，首先在系统变量新建一个变量名为<code>JAVA_HOME</code>，变量值为你自己实际安装JDK的路径</p>
+<img src="/AndroidStudio_Development_Env_Setup/4.jpg" title="图4">
+<p>接着编辑path变量添加<code>%JAVA_HOME%\bin;</code>变量</p>
+<img src="/AndroidStudio_Development_Env_Setup/5.jpg" title="图5">
+<p>打开cmd命令行窗口输入如下两条命令如果显示如下则JDK环境变量配置成功</p>
+<img src="/AndroidStudio_Development_Env_Setup/6.jpg" title="图6">
+<h2 id="AndroidStudio安装配置"><a href="#AndroidStudio安装配置" class="headerlink" title="AndroidStudio安装配置"></a>AndroidStudio安装配置</h2><p>进入官方下载网站，根据你自己的系统平台选择对应AndroidStudio下载</p>
+<img src="/AndroidStudio_Development_Env_Setup/7.jpg" title="图7">
+<p>我下载的是AndroidStudio安装程序，打开安装程序可能会很久没有窗口响应，这应该是正常现象只要耐心等待一会就会跳出安装程序窗口，<strong>注意安装环境下需要全程联网否则可能会出现一堆问题，最好是科学上网环境否则有些下载会失败</strong></p>
+<img src="/AndroidStudio_Development_Env_Setup/8.jpg" title="图8">
+<p>选择你认为合适的安装路径，然后下一步进行安装</p>
+<img src="/AndroidStudio_Development_Env_Setup/9.jpg" title="图9">
+<p>安装完毕之后打开AndroidStudio，会提示导入工作目录（工作目录中保存着AndroidStudio的配置文件等），如果之前使用过AndroidStudi可以选择导入工作目录，首次安装直接选择不导入即可</p>
+<img src="/AndroidStudio_Development_Env_Setup/10.jpg" title="图10">
+<p>之后会提示是否允许Google收集并发送匿名工具使用数据等，我选择不发送</p>
+<img src="/AndroidStudio_Development_Env_Setup/11.jpg" title="图11">
+<p>接着会提示我们是否要设置代理，现在一般情况下不需要代理也可以访问，有些情况下可能需要代理才能访问所以最好是弄一下科学上网环境，我这里选择不设置</p>
+<img src="/AndroidStudio_Development_Env_Setup/12.jpg" title="图12">
+<p>配置完成之后会显示如图13窗口选择下一步即可</p>
+<img src="/AndroidStudio_Development_Env_Setup/13.jpg" title="图13">
+<p>为AndroidStudio选择你想要的设置类型，这里我们选择第一项标准设置即可，第二项为自定义配置</p>
+<img src="/AndroidStudio_Development_Env_Setup/14.jpg" title="图14">
+<p>选择AndroidStudio主题，根据个人喜好选择即可</p>
+<img src="/AndroidStudio_Development_Env_Setup/15.jpg" title="图15">
+<p>接下来AndroidStudio提示下载SDK，我这里选择Cancel，因为AndroidStudio默认会将SDK下载到C盘而且现在不能更改下载路径，选中Cancel之后提示我们在跳过设置向导，询问我们下次打开AndroidStudio是否还要重新运行向导，我们这里选择第二项不运行向导</p>
+<img src="/AndroidStudio_Development_Env_Setup/16.jpg" title="图16">
+<p>设置完成之后来到了AndroisStudio主界面，由于我们刚刚跳过了SDK的下载所以我们要配置下载SDK</p>
+<img src="/AndroidStudio_Development_Env_Setup/17.jpg" title="图17">
+<p>我们选择Configure然后选择SDK Manger</p>
+<img src="/AndroidStudio_Development_Env_Setup/18.jpg" title="图18">
+<p>可能会出现点击SDK Manger无响应的情况，如果出现这个情况我们只要选择设置Settings选项然后在System Settings选项下选择Androis SDK也是相同的，接着我们点击Edit配置SDK路径</p>
+<img src="/AndroidStudio_Development_Env_Setup/19.jpg" title="图19">
+<p>注意选择SDK路径的盘符容量要大一些，因为SDK使用后续会越来越大</p>
+<img src="/AndroidStudio_Development_Env_Setup/20.jpg" title="图20">
+<p>下一步即可</p>
+<img src="/AndroidStudio_Development_Env_Setup/21.jpg" title="图21">
+<p>接下来要做的就是等待SDK下载完成，当然你的网速越快SDK安装也越快</p>
+<img src="/AndroidStudio_Development_Env_Setup/22.jpg" title="图22">
+<p>显示如下界面则SDK安装完成</p>
+<img src="/AndroidStudio_Development_Env_Setup/23.jpg" title="图23">
+<p>接下来我们新建一个测试工程</p>
+<img src="/AndroidStudio_Development_Env_Setup/24.jpg" title="图24">
+<p>选择新建一个Empty Activity</p>
+<img src="/AndroidStudio_Development_Env_Setup/25.jpg" title="图25">
+<p>配置工程，设置工程名、公司域名、项目保存路径等等</p>
+<img src="/AndroidStudio_Development_Env_Setup/26.jpg" title="图26">
+<p>此时会联网下载Gradle构建工具，这一步最好全局科学上网否则下载可能会失败</p>
+<img src="/AndroidStudio_Development_Env_Setup/27.jpg" title="图27">
+<p>如果没有出错我们点击小锤子进行编译</p>
+<img src="/AndroidStudio_Development_Env_Setup/28.jpg" title="图28">
+<p>编译成功APK文件默认生成在你的项目工程下的<code>app\build\outputs\apk\debug\app-debug.apk</code></p>
+<img src="/AndroidStudio_Development_Env_Setup/29.jpg" title="图29">
+<p>测试APP的话可以使用Android Studio中的AVD Manger创建虚拟机，或者下载其他Android模拟器，我这里adb安装到使用实体机测试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS D:\AndroidStudioProjects\MyApplication\app\build\outputs\apk\debug&gt; adb install .\app-debug.apk</span><br><span class="line">Performing Push Install</span><br><span class="line">.\app-debug.apk: 1 file pushed. 3.6 MB/s (1651404 bytes in 0.439s)</span><br><span class="line">        pkg: /data/local/tmp/app-debug.apk</span><br><span class="line">Success</span><br></pre></td></tr></table></figure>
+<p>如果生成生成了APP并且成功运行，则整个Android Studio开发环境搭建完成</p>
+<img src="/AndroidStudio_Development_Env_Setup/30.jpg" title="图30">
+<hr>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+	<div>
+	  
+        <div>
+    
+        <div style="text-align:center;color: #636363;font-size:14px;letter-spacing: 10px">本文结束啦<i class="fa fa-bell"></i>感谢您的阅读</div>
+    
+</div>
+      
+    </div>
+<div>    
+ 
+ 
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+	  <strong>本文作者：</strong> Likte
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/AndroidStudio_Development_Env_Setup.html" title="AndroidStudio开发环境搭建">https://likte.me/AndroidStudio_Development_Env_Setup.html</a>
+  </li>
+  <li class="post-copyright-license">
+	<strong>版权声明： </strong>
+    本站文章均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议，转载注明出处链接及作者！
+  </li>
+</ul>
+
+</div>
+      
+        <div class="post-tags">
+          
+            <a href="/tags/AndroidStudio/" rel="tag"># AndroidStudio</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Internals_meterpreter_payload.html" rel="next" title="深入解析Meterpreter有效载荷">
+                <i class="fa fa-chevron-left"></i> 深入解析Meterpreter有效载荷
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/pwnable_kr_writeup_fd.html" rel="prev" title="pwnable.kr系列writeup之fd">
+                pwnable.kr系列writeup之fd <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Likte">
+            
+              <p class="site-author-name" itemprop="name">Likte</p>
+              <p class="site-description motion-element" itemprop="description">Have you tried your best?</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/likte" title="GitHub &rarr; https://github.com/likte" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:likte@protonmail.com" title="E-Mail &rarr; mailto:likte@protonmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+             <div class="cc-license motion-element" itemprop="license">
+              
+                
+              
+              
+              
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+             </div>
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK环境配置"><span class="nav-number">1.</span> <span class="nav-text">JDK环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AndroidStudio安装配置"><span class="nav-number">2.</span> <span class="nav-text">AndroidStudio安装配置</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Likte</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'xztdFLMG5uSSCyctC2WtdHCM-gzGzoHsz',
+    appKey: '9BrITJLcXcIXYLFft9DhURVH',
+    placeholder: 'ヾﾉ≧∀≦)o 来呀！快活呀！~',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+</script>
+
+
+
+
+  
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="推荐资料看雪论坛WINDBG参考手册V0.6 本文章主要记录WinDbg常用的命令和使用技巧等，会持续更新 符号相关命令 重新加载符号：.reload、!reload  查看符号路径：.sympath 1230:000&amp;gt; .sympathSymbol search path is: srv*c:\symbolslocal*http://msdl.microsoft.com/download/">
+<meta name="keywords" content="WinDbg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WinDbg命令及使用">
+<meta property="og:url" content="https://likte.me/WinDbg_Command.html">
+<meta property="og:site_name" content="Likte&#39;s Blog">
+<meta property="og:description" content="推荐资料看雪论坛WINDBG参考手册V0.6 本文章主要记录WinDbg常用的命令和使用技巧等，会持续更新 符号相关命令 重新加载符号：.reload、!reload  查看符号路径：.sympath 1230:000&amp;gt; .sympathSymbol search path is: srv*c:\symbolslocal*http://msdl.microsoft.com/download/">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-20T05:55:00.783Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WinDbg命令及使用">
+<meta name="twitter:description" content="推荐资料看雪论坛WINDBG参考手册V0.6 本文章主要记录WinDbg常用的命令和使用技巧等，会持续更新 符号相关命令 重新加载符号：.reload、!reload  查看符号路径：.sympath 1230:000&amp;gt; .sympathSymbol search path is: srv*c:\symbolslocal*http://msdl.microsoft.com/download/">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Likte's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://likte.me/WinDbg_Command.html">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>WinDbg命令及使用 | Likte's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Likte's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://likte.me/WinDbg_Command.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Likte">
+      <meta itemprop="description" content="Have you tried your best?">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Likte's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">WinDbg命令及使用
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+		
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-07 15:04:01" itemprop="dateCreated datePublished" datetime="2019-03-07T15:04:01+08:00">2019-03-07</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-20 13:55:00" itemprop="dateModified" datetime="2019-03-20T13:55:00+08:00">2019-03-20</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/安全工具/" itemprop="url" rel="index"><span itemprop="name">安全工具</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <a href="/WinDbg_Command.html#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/WinDbg_Command.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+      
+      
+
+      
+        <p>推荐资料<a href="https://bbs.pediy.com/thread-178808-1.htm" target="_blank" rel="noopener">看雪论坛WINDBG参考手册V0.6</a></p>
+<p>本文章主要记录WinDbg常用的命令和使用技巧等，会持续更新</p>
+<h2 id="符号相关命令"><a href="#符号相关命令" class="headerlink" title="符号相关命令"></a>符号相关命令</h2><ul>
+<li><p>重新加载符号：<code>.reload</code>、<code>!reload</code></p>
+</li>
+<li><p>查看符号路径：<code>.sympath</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; .sympath</span><br><span class="line">Symbol search path is: srv*c:\symbolslocal*http://msdl.microsoft.com/download/symbols</span><br><span class="line">Expanded Symbol search path is: srv*c:\symbolslocal*http://msdl.microsoft.com/download/symbols</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>加载符号：<code>ld CrashMe</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; ld CrashMe</span><br><span class="line">Symbols already loaded for CrashMe</span><br><span class="line">0:000&gt; lm m CrashMe</span><br><span class="line">start    end        module name</span><br><span class="line">00400000 006d2000   CrashMe  C (private pdb symbols)  C:\Users\Likte\Desktop\CrashMe\debug\CrashMe.pdb</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li>显示加载符号信息：<code>!sym</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">开启加载符号时显示匹配路径</span><br><span class="line">0:000&gt; !sym noisy</span><br><span class="line">noisy mode - symbol prompts on</span><br><span class="line">重新加载模块</span><br><span class="line">0:000&gt; .reload /f CrashMe.exe</span><br><span class="line">日志输出告诉我们查找pdb符号时去了哪些路径寻找和符号加载失败和成功信息</span><br><span class="line">SYMSRV:  c:\symbolslocal\CrashMe.pdb\BC84AFB5E68C45F2A8C070914C4E68B72\CrashMe.pdb not found</span><br><span class="line">SYMSRV:  http://msdl.microsoft.com/download/symbols/CrashMe.pdb/BC84AFB5E68C45F2A8C070914C4E68B72/CrashMe.pdb not found</span><br><span class="line">*** WARNING: Unable to verify checksum for CrashMe.exe</span><br><span class="line">DBGHELP: CrashMe - private symbols &amp; lines </span><br><span class="line">         C:\Users\Likte\Desktop\CrashMe\debug\CrashMe.pdb</span><br><span class="line">重新加载ntdll符号</span><br><span class="line">0:000&gt; .reload /f ntdll.dll</span><br><span class="line">DBGHELP: ntdll - public symbols  </span><br><span class="line">         c:\symbolslocal\wntdll.pdb\DCCFF2D483FA4DEE81DC04552C73BB5E2\wntdll.pdb</span><br><span class="line">关闭模块加载匹配信息，关闭之后加载模块时不会再显示上方的路径匹配信息</span><br><span class="line">0:000&gt; !sym quiet</span><br><span class="line">quiet mode - symbol prompts on</span><br><span class="line">显示配置信息</span><br><span class="line">0:000&gt; !sym</span><br><span class="line">!sym &lt;noisy/quiet - prompts/prompts off&gt; - quiet mode - symbol prompts on</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="调式执行命令"><a href="#调式执行命令" class="headerlink" title="调式执行命令"></a>调式执行命令</h2><ul>
+<li><p>运行程序命令：<code>g</code></p>
+<ul>
+<li>快捷键：<code>F5</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">执行到指定地址</span><br><span class="line">g address</span><br><span class="line">让被冻结的1号线程继续执行</span><br><span class="line">~1 g</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>运行到光标所在处快捷键：<code>F7</code></p>
+</li>
+<li><p>单步步入命令：<code>t</code></p>
+<ul>
+<li>快捷键：<code>F8</code></li>
+</ul>
+</li>
+<li><p>单步步过命令：<code>p</code></p>
+<ul>
+<li>快捷键：<code>F10</code></li>
+</ul>
+</li>
+<li><p>重新运行调试程序快捷键：<code>Ctrl+Shift+F5</code></p>
+</li>
+<li><p>执行到返回命令：<code>gu</code></p>
+</li>
+<li><p>忽略异常继续执行命令：<code>gn</code></p>
+</li>
+<li><p>从断点处继续执行命令：<code>gc</code></p>
+</li>
+<li><p>异常被处理继续执行命令：<code>gh</code></p>
+</li>
+</ul>
+<h2 id="断点相关命令"><a href="#断点相关命令" class="headerlink" title="断点相关命令"></a>断点相关命令</h2><ul>
+<li><p>软件断点：<code>bp</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">直接对某个地址下断：bp 0x401000</span><br><span class="line">Windbg会自动对OEP对应地址下断：bp $exentry</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>内存断点：<code>ba</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">命令格式</span><br><span class="line">ba access size address</span><br><span class="line">access：内存断点的触发权限,e(执行)，w(写)，r(读/写)</span><br><span class="line">size：下断的字节,如1、2、4、8</span><br><span class="line">address：需要下断的内存地址</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>符号断点：<code>bm</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">支持对多个符号下断</span><br><span class="line">对CCrashMeDlg所有成员下断：bm CrashMe!CCrashMeDlg::*</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>也是符号断点：<code>bu</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">可对某个未加载的模块下断</span><br><span class="line">假如此时模块未加载下断当加载此模块后断点自动激活：bu CrashMe!CCrashMeDlg::OnBnClicked_ExecuteBreakPoint</span><br><span class="line">如果使用bp命令对未加载模块下断会失败因为未加载模块没有地址所以不能下软件断点</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看所有断点列表：<code>bl</code></p>
+</li>
+<li><p>禁用断点：<code>bd 1</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">禁用对应的断点</span><br><span class="line">禁用1号断点：bd 1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启用断点：<code>be 1</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">启用被bd命令禁用的断点</span><br><span class="line">启用1号断点：be 1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>清除所有断点：<code>bc *</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">可以直接清除所有断点也可以清除对应的断点</span><br><span class="line">清除1号断点：bc 1</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="栈相关命令"><a href="#栈相关命令" class="headerlink" title="栈相关命令"></a>栈相关命令</h2><ul>
+<li>显示所有栈地址、返回地址、函数名信息：<code>k</code></li>
+<li>显示函数调用时的前三个参数：<code>b</code></li>
+<li>只显示函数名：<code>c</code></li>
+<li>显示函数的所有参数，包括参数的名字、类型、值：<code>p</code></li>
+<li>显示帧指针遗漏(FPO)信息。在基于x86处理器,显示器还包括调用约定信息：<code>v</code></li>
+<li>显示调用栈的每帧编号：<code>n</code></li>
+<li>显示调用栈的每帧占用字节数：<code>f</code></li>
+<li>如显示16层调用栈，包含函数参数、栈编号、占用字节数：<code>kbnf 10</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">注意WinDbg中默认的是十六进制</span><br><span class="line">0:000&gt; kbnf 10</span><br><span class="line"> #   Memory  ChildEBP RetAddr  Args to Child              </span><br><span class="line">WARNING: Stack unwind information not available. Following frames may be wrong.</span><br><span class="line">00           0018f530 004e8a10 00000000 00000176 00000004 CrashMe+0x1884c7</span><br><span class="line">01        44 0018f574 004e914f 0018fda4 0000006d 00000000 CrashMe+0xe8a10</span><br><span class="line">02        64 0018f5d8 004bf1c1 0000006d 00000000 00000000 CrashMe+0xe914f</span><br><span class="line">03        3c 0018f614 004dcf6d 0000006d 00000000 00000000 CrashMe+0xbf1c1</span><br><span class="line">04        64 0018f678 004dbef7 0000006d 00150472 9c110795 CrashMe+0xdcf6d</span><br><span class="line">05       138 0018f7b0 004dbe50 00000111 0000006d 00150472 CrashMe+0xdbef7</span><br><span class="line">06        20 0018f7d0 004d934e 00000111 0000006d 00150472 CrashMe+0xdbe50</span><br><span class="line">07        7c 0018f84c 004d9854 0018fda4 00690330 00000111 CrashMe+0xd934e</span><br><span class="line">08        20 0018f86c 762e62fa 00690330 00000111 0000006d CrashMe+0xd9854</span><br><span class="line">09        2c 0018f898 762e6d3a 004af031 00690330 00000111 USER32!InternalCallWinProc+0x23</span><br><span class="line">0a        78 0018f910 762e965e 00000000 004af031 00690330 USER32!UserCallWinProcCheckWow+0x109</span><br><span class="line">0b        44 0018f954 762e96c5 00dc9260 00000000 004af031 USER32!SendMessageWorker+0x581</span><br><span class="line">0c        24 0018f978 75074601 00690330 00000111 0000006d USER32!SendMessageW+0x7f</span><br><span class="line">0d        20 0018f998 75074663 00b2e710 00000000 00150472 COMCTL32!Button_NotifyParent+0x3d</span><br><span class="line">0e        1c 0018f9b4 750744ed 50010001 00000001 00000000 COMCTL32!Button_ReleaseCapture+0x113</span><br><span class="line">0f        60 0018fa14 762e62fa 00150472 00000202 00000000 COMCTL32!Button_WndProc+0xa18</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="寄存器相关命令"><a href="#寄存器相关命令" class="headerlink" title="寄存器相关命令"></a>寄存器相关命令</h2><ul>
+<li>查看所有寄存器：<code>r</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; r</span><br><span class="line">eax=00000000 ebx=00000000 ecx=ddba0000 edx=0008e3c8 esi=fffffffe edi=00000000</span><br><span class="line">eip=77cc0f3b esp=0018fb08 ebp=0018fb34 iopl=0         nv up ei pl zr na pe nc</span><br><span class="line">cs=0023  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00000246</span><br><span class="line">ntdll!LdrpDoDebuggerBreak+0x2c:</span><br><span class="line">77cc0f3b cc              int     3</span><br><span class="line"></span><br><span class="line">显示指定寄存器值</span><br><span class="line">0:000&gt; r ecx</span><br><span class="line">ecx=ddba0000</span><br><span class="line"></span><br><span class="line">修改寄存器值</span><br><span class="line">0:000&gt; r ecx=66</span><br><span class="line">0:000&gt; r ecx</span><br><span class="line">ecx=00000066</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="汇编反汇编"><a href="#汇编反汇编" class="headerlink" title="汇编反汇编"></a>汇编反汇编</h2><ul>
+<li>向下反汇编：<code>u</code></li>
+<li>向上反汇编：<code>ub</code></li>
+<li>反汇编整个函数：<code>uf</code></li>
+</ul>
+<h2 id="内存相关命令"><a href="#内存相关命令" class="headerlink" title="内存相关命令"></a>内存相关命令</h2><ul>
+<li><p>查看内存属性：<code>!vprot</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; !vprot 400000</span><br><span class="line">BaseAddress:       00400000</span><br><span class="line">AllocationBase:    00400000</span><br><span class="line">AllocationProtect: 00000080  PAGE_EXECUTE_WRITECOPY</span><br><span class="line">RegionSize:        00001000</span><br><span class="line">State:             00001000  MEM_COMMIT</span><br><span class="line">Protect:           00000002  PAGE_READONLY</span><br><span class="line">Type:              01000000  MEM_IMAGE</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看内存信息：<code>!address</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; !address 400000</span><br><span class="line">Usage:                  Image</span><br><span class="line">Allocation Base:        00400000</span><br><span class="line">Base Address:           00400000</span><br><span class="line">End Address:            00401000</span><br><span class="line">Region Size:            00001000</span><br><span class="line">Type:                   01000000	MEM_IMAGE</span><br><span class="line">State:                  00001000	MEM_COMMIT</span><br><span class="line">Protect:                00000002	PAGE_READONLY</span><br><span class="line">More info:              lmv m CrashMe</span><br><span class="line">More info:              !lmi CrashMe</span><br><span class="line">More info:              ln 0x400000</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>分配内存：<code>.dvalloc</code></p>
+</li>
+<li>释放内存：<code>.dvfree</code></li>
+<li><p>查看内存数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1字节/2字节/4字节/8字节/单浮点数(4字节)/双浮点数(8字节)/指针</span><br><span class="line">db/dw/dd/dq/df/dD/dp address</span><br><span class="line">ASCII字符串/2字节ASCII字符串/4字节ASCII字符串/Unicode字符串/1字节二进制/4字节二进制</span><br><span class="line">da/dW/dc/du/dyb/dyd address</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改内存数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">分别写入：1字节/2字节/4字节/8字节/单浮点数(4字节)/双浮点数(8字节)/指针</span><br><span class="line">eb/ew/ed/eD/eq/ef/ep address value</span><br><span class="line"></span><br><span class="line">分别写入：ASCII字符串/Unicode字符串/无结束符的ASCII字符串/无结束符的Unicode字符串</span><br><span class="line">ea/eu/eza/ezu address Value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>搜索内存：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">搜索1字节/2字节/4字节/8字节/ASCII字符串/Unicode字符串</span><br><span class="line">s -[b/w/d/q/a/u] address string</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Dump内存：<code>.writemem</code></p>
+</li>
+<li>读取文件数据到内存：<code>.readmem</code></li>
+</ul>
+<h2 id="进程相关命令"><a href="#进程相关命令" class="headerlink" title="进程相关命令"></a>进程相关命令</h2><ul>
+<li>列出所有进程：<code>.tlist</code></li>
+<li><p>查看所有进程详细信息：<code>.tlist -v</code></p>
+</li>
+<li><p>查看线程环境块：<code>!teb</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; !teb</span><br><span class="line">TEB at 7efdd000</span><br><span class="line">    ExceptionList:        0018f7a4</span><br><span class="line">    StackBase:            00190000</span><br><span class="line">    StackLimit:           0018d000</span><br><span class="line">    SubSystemTib:         00000000</span><br><span class="line">    FiberData:            00001e00</span><br><span class="line">    ArbitraryUserPointer: 00000000</span><br><span class="line">    Self:                 7efdd000</span><br><span class="line">    EnvironmentPointer:   00000000</span><br><span class="line">    ClientId:             00000f1c . 00000e58</span><br><span class="line">    RpcHandle:            00000000</span><br><span class="line">    Tls Storage:          7efdd02c</span><br><span class="line">    PEB Address:          7efde000</span><br><span class="line">    LastErrorValue:       0</span><br><span class="line">    LastStatusValue:      c0000034</span><br><span class="line">    Count Owned Locks:    0</span><br><span class="line">    HardErrorMode:        0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看进程环境块：<code>!peb</code></p>
+</li>
+<li><p>查看当前进程所有模块：<code>lm</code></p>
+</li>
+<li><p>查看某个模块详细信息：<code>lm vm CrashMe</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; lm vm CrashMe</span><br><span class="line">start    end        module name</span><br><span class="line">00400000 006d2000   CrashMe  C (private pdb symbols)  C:\Users\Likte\Desktop\CrashMe\debug\CrashMe.pdb</span><br><span class="line">    Loaded symbol image file: C:\Users\Likte\Desktop\CrashMe\debug\CrashMe.exe</span><br><span class="line">    Image path: CrashMe.exe</span><br><span class="line">    Image name: CrashMe.exe</span><br><span class="line">    Timestamp:        Tue Apr 20 00:56:40 2010 (4BCC8B48)</span><br><span class="line">    CheckSum:         00000000</span><br><span class="line">    ImageSize:        002D2000</span><br><span class="line">    File version:     1.0.0.1</span><br><span class="line">    Product version:  1.0.0.1</span><br><span class="line">    File flags:       1 (Mask 3F) Debug</span><br><span class="line">    File OS:          4 Unknown Win32</span><br><span class="line">    File type:        1.0 App</span><br><span class="line">    File date:        00000000.00000000</span><br><span class="line">    Translations:     0409.04e4</span><br><span class="line">    CompanyName:      CrashME</span><br><span class="line">    ProductName:      CrashMe</span><br><span class="line">    InternalName:     CrashMe.exe</span><br><span class="line">    OriginalFilename: CrashMe.exe</span><br><span class="line">    ProductVersion:   1.0.0.1</span><br><span class="line">    FileVersion:      1.0.0.1</span><br><span class="line">    FileDescription:  CrashMe</span><br><span class="line">    LegalCopyright:   www.windbg.info. All rights reserved.</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看模块支持通配符：<code>lm m U*</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; lm m U*</span><br><span class="line">start    end        module name</span><br><span class="line">74910000 74990000   uxtheme    (pdb symbols)          c:\symbolslocal\wuxtheme.pdb\20C669C0018E406295BFA56B7C93850F2\wuxtheme.pdb</span><br><span class="line">762d0000 763d0000   USER32     (pdb symbols)          c:\symbolslocal\wuser32.pdb\0FCE9CC301ED4567A819705B2718E1D62\wuser32.pdb</span><br><span class="line">763d0000 7646d000   USP10      (pdb symbols)          c:\symbolslocal\usp10.pdb\F49786E2C7C54EA99E7C37120CDAEB9C1\usp10.pdb</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看句柄表：<code>!handle</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">查看所有句柄</span><br><span class="line">0:000&gt; !handle</span><br><span class="line">Handle 4</span><br><span class="line">  Type         	Key</span><br><span class="line">Handle 8</span><br><span class="line">  Type         	Directory</span><br><span class="line">Handle c</span><br><span class="line">  Type         	Directory</span><br><span class="line">Handle 10</span><br><span class="line">  Type         	File</span><br><span class="line">Handle 14</span><br><span class="line">  Type         	Key</span><br><span class="line">Handle 18</span><br><span class="line">  Type         	Directory</span><br><span class="line">Handle 1c</span><br><span class="line">  Type         	File</span><br><span class="line">Handle 20</span><br><span class="line">  Type         	File</span><br><span class="line">Handle 28</span><br><span class="line">  Type         	ALPC Port</span><br><span class="line">Handle 2f8</span><br><span class="line">  Type         	Section</span><br><span class="line">Handle 2fc</span><br><span class="line">  Type         	Section</span><br><span class="line">Handle 300</span><br><span class="line">  Type         	Section</span><br><span class="line">Handle 304</span><br><span class="line">  Type         	Section</span><br><span class="line">Handle 308</span><br><span class="line">  Type         	Section</span><br><span class="line">Handle 30c</span><br><span class="line">  Type         	Section</span><br><span class="line">Handle 714</span><br><span class="line">  Type         	File</span><br><span class="line">16 Handles</span><br><span class="line">Type           	Count</span><br><span class="line">None           	1</span><br><span class="line">Section        	6</span><br><span class="line">File           	4</span><br><span class="line">Directory      	3</span><br><span class="line">Key            	2</span><br><span class="line"></span><br><span class="line">查看句柄1c的信息</span><br><span class="line">0:000&gt; !handle 1c</span><br><span class="line">Handle 1c</span><br><span class="line">  Type         	File</span><br><span class="line">  </span><br><span class="line">查看句柄1c的详细信息</span><br><span class="line">0:000&gt; !handle 1c 3</span><br><span class="line">Handle 1c</span><br><span class="line">  Type         	File</span><br><span class="line">  Attributes   	0</span><br><span class="line">  GrantedAccess	0x100020:</span><br><span class="line">         Synch</span><br><span class="line">         Execute/Traverse</span><br><span class="line">  HandleCount  	2</span><br><span class="line">  PointerCount 	3</span><br><span class="line">  </span><br><span class="line">查看类型为key的句柄详情</span><br><span class="line">0:000&gt; !handle 0 3 key</span><br><span class="line">Handle 4</span><br><span class="line">  Type         	Key</span><br><span class="line">  Attributes   	0</span><br><span class="line">  GrantedAccess	0x9:</span><br><span class="line">         None</span><br><span class="line">         QueryValue,EnumSubKey</span><br><span class="line">  HandleCount  	2</span><br><span class="line">  PointerCount 	3</span><br><span class="line">Handle 14</span><br><span class="line">  Type         	Key</span><br><span class="line">  Attributes   	0</span><br><span class="line">  GrantedAccess	0x9:</span><br><span class="line">         None</span><br><span class="line">         QueryValue,EnumSubKey</span><br><span class="line">  HandleCount  	2</span><br><span class="line">  PointerCount 	3</span><br><span class="line">2 handles of type Key</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看进程堆：<code>!heap</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">查看进程所有堆</span><br><span class="line">0:000&gt; !heap</span><br><span class="line">NtGlobalFlag enables following debugging aids for new heaps:    tail checking</span><br><span class="line">    free checking</span><br><span class="line">    validate parameters</span><br><span class="line">Index   Address  Name      Debugging options enabled</span><br><span class="line">  1:   002a0000                 tail checking free checking validate parameters</span><br><span class="line"></span><br><span class="line">查看指定堆</span><br><span class="line">0:000&gt; !heap 002a0000</span><br><span class="line">Index   Address  Name      Debugging options enabled</span><br><span class="line">  1:   002a0000 </span><br><span class="line">    Segment at 002a0000 to 003a0000 (00006000 bytes committed)</span><br><span class="line"></span><br><span class="line">查看堆详情</span><br><span class="line">0:000&gt; !heap -a 002a0000</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="线程相关命令"><a href="#线程相关命令" class="headerlink" title="线程相关命令"></a>线程相关命令</h2><ul>
+<li>当前线程：<code>~.</code></li>
+<li>所有线程：<code>~*</code></li>
+<li>异常或产生调式事件线程：<code>~#</code></li>
+<li>显示对应的线程：<code>~1</code></li>
+<li>选择任意线程为当前线程：<code>~1 s</code></li>
+<li>冻结线程：<code>~1 f</code></li>
+<li>解冻线程：<code>~1 u</code></li>
+<li>挂起线程：<code>~1 n</code></li>
+<li>恢复线程：<code>~1 m</code></li>
+<li>查看1号线程的栈：<code>~1 k</code></li>
+<li>查看所有线程的栈：<code>~* k</code></li>
+<li>对某个线程下断：<code>~ 1 bp CCrashMeDlg::OnBnClicked_ExecuteBreakPoint</code></li>
+</ul>
+<hr>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+	<div>
+	  
+        <div>
+    
+        <div style="text-align:center;color: #636363;font-size:14px;letter-spacing: 10px">本文结束啦<i class="fa fa-bell"></i>感谢您的阅读</div>
+    
+</div>
+      
+    </div>
+<div>    
+ 
+ 
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+	  <strong>本文作者：</strong> Likte
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/WinDbg_Command.html" title="WinDbg命令及使用">https://likte.me/WinDbg_Command.html</a>
+  </li>
+  <li class="post-copyright-license">
+	<strong>版权声明： </strong>
+    本站文章均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议，转载注明出处链接及作者！
+  </li>
+</ul>
+
+</div>
+      
+        <div class="post-tags">
+          
+            <a href="/tags/WinDbg/" rel="tag"># WinDbg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/ichunqiu_CTF.html" rel="next" title="i春秋CTF大本营竞赛训练Reverse解题">
+                <i class="fa fa-chevron-left"></i> i春秋CTF大本营竞赛训练Reverse解题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/USE_WDK7600_CompileWindowsDrivers.html" rel="prev" title="安装并配置WDK7600编译Windows驱动程序">
+                安装并配置WDK7600编译Windows驱动程序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Likte">
+            
+              <p class="site-author-name" itemprop="name">Likte</p>
+              <p class="site-description motion-element" itemprop="description">Have you tried your best?</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/likte" title="GitHub &rarr; https://github.com/likte" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:likte@protonmail.com" title="E-Mail &rarr; mailto:likte@protonmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+             <div class="cc-license motion-element" itemprop="license">
+              
+                
+              
+              
+              
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+             </div>
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#符号相关命令"><span class="nav-number">1.</span> <span class="nav-text">符号相关命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调式执行命令"><span class="nav-number">2.</span> <span class="nav-text">调式执行命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#断点相关命令"><span class="nav-number">3.</span> <span class="nav-text">断点相关命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#栈相关命令"><span class="nav-number">4.</span> <span class="nav-text">栈相关命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#寄存器相关命令"><span class="nav-number">5.</span> <span class="nav-text">寄存器相关命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#汇编反汇编"><span class="nav-number">6.</span> <span class="nav-text">汇编反汇编</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存相关命令"><span class="nav-number">7.</span> <span class="nav-text">内存相关命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进程相关命令"><span class="nav-number">8.</span> <span class="nav-text">进程相关命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程相关命令"><span class="nav-number">9.</span> <span class="nav-text">线程相关命令</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Likte</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'xztdFLMG5uSSCyctC2WtdHCM-gzGzoHsz',
+    appKey: '9BrITJLcXcIXYLFft9DhURVH',
+    placeholder: 'ヾﾉ≧∀≦)o 来呀！快活呀！~',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+</script>
+
+
+
+
+  
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

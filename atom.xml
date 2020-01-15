@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Likte&#39;s Blog</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://likte.me/"/>
+  <updated>2019-05-08T06:03:51.122Z</updated>
+  <id>https://likte.me/</id>
+  
+  <author>
+    <name>Likte</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>pwnable.kr系列writeup之collision</title>
+    <link href="https://likte.me/pwnable_kr_writeup_collision.html"/>
+    <id>https://likte.me/pwnable_kr_writeup_collision.html</id>
+    <published>2019-05-07T06:35:22.000Z</published>
+    <updated>2019-05-08T06:03:51.122Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;本篇内容是pwnable.kr系列writeup的第二篇collision，此题目的目的是为了让我们学习和了解MD5 hash碰撞相关的知识内容&lt;/p&gt;
+&lt;h2 id=&quot;题目&quot;&gt;&lt;a href=&quot;#题目&quot; class=&quot;headerlink&quot; title=&quot;题目&quot;&gt;&lt;/a&gt;题目&lt;/h2&gt;&lt;p&gt;还是老样子题目需要我们连接ssh，这次给我的提示是关于MD5 hash碰撞&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Daddy told me about cool MD5 hash collision today.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;I wanna do something like that too!&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;ssh col@pwnable.kr -p2222 (pw:guest)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;还是首先&lt;code&gt;ls&lt;/code&gt;查看有什么惊喜，然后用&lt;code&gt;cat&lt;/code&gt;查看题目源码&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="pwn" scheme="https://likte.me/categories/pwn/"/>
+    
+    
+      <category term="pwnable.kr" scheme="https://likte.me/tags/pwnable-kr/"/>
+    
+      <category term="collision" scheme="https://likte.me/tags/collision/"/>
+    
+      <category term="MD5 hash collision" scheme="https://likte.me/tags/MD5-hash-collision/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>pwnable.kr系列writeup之fd</title>
+    <link href="https://likte.me/pwnable_kr_writeup_fd.html"/>
+    <id>https://likte.me/pwnable_kr_writeup_fd.html</id>
+    <published>2019-05-06T12:20:56.000Z</published>
+    <updated>2019-05-08T06:02:57.729Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;接下来将会记录一下pwnable.kr系列的writeup，本篇是第一题fd，当然重点不是&lt;code&gt;writeup&lt;/code&gt;而是要学习解题中遇到的新知识和思路，本题目的目的是为了让我们学习&lt;code&gt;Linux file IO&lt;/code&gt;相关的知识&lt;/p&gt;
+&lt;h2 id=&quot;题目&quot;&gt;&lt;a href=&quot;#题目&quot; class=&quot;headerlink&quot; title=&quot;题目&quot;&gt;&lt;/a&gt;题目&lt;/h2&gt;&lt;p&gt;我们可以看到题目给了我们一个小提示&lt;code&gt;Linux中的文件描述符是什么?&lt;/code&gt;，可见这题考察的应该是关于Linux文件描述符相关的知识，还为初学者准备一个解题的油管视频，当然题目需要我们&lt;code&gt;ssh&lt;/code&gt;到题目中所给的&lt;code&gt;pwnable.kr&lt;/code&gt;服务器&lt;/p&gt;
+&lt;img src=&quot;/pwnable_kr_writeup_fd/1.jpg&quot; title=&quot;图1&quot;&gt;
+    
+    </summary>
+    
+      <category term="pwn" scheme="https://likte.me/categories/pwn/"/>
+    
+    
+      <category term="pwnable.kr" scheme="https://likte.me/tags/pwnable-kr/"/>
+    
+      <category term="fd" scheme="https://likte.me/tags/fd/"/>
+    
+      <category term="Linux file IO" scheme="https://likte.me/tags/Linux-file-IO/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AndroidStudio开发环境搭建</title>
+    <link href="https://likte.me/AndroidStudio_Development_Env_Setup.html"/>
+    <id>https://likte.me/AndroidStudio_Development_Env_Setup.html</id>
+    <published>2019-05-05T03:31:20.000Z</published>
+    <updated>2019-05-05T07:21:36.219Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;JDK环境配置&quot;&gt;&lt;a href=&quot;#JDK环境配置&quot; class=&quot;headerlink&quot; title=&quot;JDK环境配置&quot;&gt;&lt;/a&gt;JDK环境配置&lt;/h2&gt;&lt;p&gt;如图1首先进入oracle官网下载jdk11安装包&lt;/p&gt;
+&lt;img src=&quot;/AndroidStudio_Development_Env_Setup/1.jpg&quot; title=&quot;图1&quot;&gt;
+    
+    </summary>
+    
+      <category term="安卓开发" scheme="https://likte.me/categories/%E5%AE%89%E5%8D%93%E5%BC%80%E5%8F%91/"/>
+    
+    
+      <category term="AndroidStudio" scheme="https://likte.me/tags/AndroidStudio/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>深入解析Meterpreter有效载荷</title>
+    <link href="https://likte.me/Internals_meterpreter_payload.html"/>
+    <id>https://likte.me/Internals_meterpreter_payload.html</id>
+    <published>2019-04-12T08:29:37.000Z</published>
+    <updated>2019-05-06T09:59:22.197Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;Meterpreter是metasploit中的一种高级，动态可扩展的有效载荷，它使用内存中的DLL注入stagers，并在运行时通过网络进行扩展，关于更多Meterpreter介绍可以参考此官方&lt;a href=&quot;https://www.offensive-security.com/metasploit-unleashed/about-meterpreter/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;连接&lt;/a&gt;，在本文中我们将结合逆向分析和阅读源码深入解析Meterpreter有效载荷技术细节。&lt;/p&gt;
+&lt;h2 id=&quot;分析环境&quot;&gt;&lt;a href=&quot;#分析环境&quot; class=&quot;headerlink&quot; title=&quot;分析环境&quot;&gt;&lt;/a&gt;分析环境&lt;/h2&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;win7x64&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;kali 2019.1a&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;msf5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;x64Dbg&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;LordPE&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;WireShark&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h2 id=&quot;生成payload&quot;&gt;&lt;a href=&quot;#生成payload&quot; class=&quot;headerlink&quot; title=&quot;生成payload&quot;&gt;&lt;/a&gt;生成payload&lt;/h2&gt;&lt;p&gt;因为我们主要是为了分析Meterpreter payload，所以我们就使用msfvenom生成一个c语言形式的reverse_tcp的shellcode方便我们进行流量分析和逆向分析，实际使用中我们一般会对payload进行加密和免杀混淆等，接着打开Metasploit监听端口&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="病毒分析" scheme="https://likte.me/categories/%E7%97%85%E6%AF%92%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="Metasploit" scheme="https://likte.me/tags/Metasploit/"/>
+    
+      <category term="Meterpreter" scheme="https://likte.me/tags/Meterpreter/"/>
+    
+      <category term="payload" scheme="https://likte.me/tags/payload/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Windows内核编程之文件操作</title>
+    <link href="https://likte.me/Windows_Kernel_File_Operate.html"/>
+    <id>https://likte.me/Windows_Kernel_File_Operate.html</id>
+    <published>2019-04-02T07:20:27.000Z</published>
+    <updated>2019-04-04T12:02:25.235Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;内核文件操作常用函数&quot;&gt;&lt;a href=&quot;#内核文件操作常用函数&quot; class=&quot;headerlink&quot; title=&quot;内核文件操作常用函数&quot;&gt;&lt;/a&gt;内核文件操作常用函数&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;函数功能&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;内核函数&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;创建文件/文件夹&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwCreateFile&lt;br&gt;IoCreateFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;获取文件句柄&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwOpenFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;删除文件/文件夹&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwDeleteFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;写入文件&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwWriteFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;读取文件&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwReadFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;查询文件/文件夹信息&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwQueryInformationFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;设置文件/文件夹信息&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwSetInformationFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;枚举文件&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwQueryDirectoryFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;把磁盘缓存的内容写入到磁盘扇区里&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwFlushBuffersFile&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;关闭内核句柄&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ZwClose&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+    
+    </summary>
+    
+      <category term="Windows驱动开发" scheme="https://likte.me/categories/Windows%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/"/>
+    
+    
+      <category term="WindowsDriver" scheme="https://likte.me/tags/WindowsDriver/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Windows内核编程之内存管理</title>
+    <link href="https://likte.me/Windows_Kernel_Memory_Manage.html"/>
+    <id>https://likte.me/Windows_Kernel_Memory_Manage.html</id>
+    <published>2019-04-01T09:48:51.000Z</published>
+    <updated>2019-04-02T07:21:50.051Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;内存管理部分API&quot;&gt;&lt;a href=&quot;#内存管理部分API&quot; class=&quot;headerlink&quot; title=&quot;内存管理部分API&quot;&gt;&lt;/a&gt;内存管理部分API&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;函数功能&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;内核版&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;应用版&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;申请内存&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ExAllocatePool&lt;br&gt;ExAllocatePoolWithTag&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;malloc&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;释放内存&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;ExFreePool&lt;br&gt;ExFreePoolWithTag&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;free&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;拷贝内存&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlCopyMemory&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;memcpy&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;填充内存&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlFillMemory&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;memset&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;移动内存&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlMoveMemory&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;memmove&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;清空内存&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlZeroMemory&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+    
+    </summary>
+    
+      <category term="Windows驱动开发" scheme="https://likte.me/categories/Windows%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/"/>
+    
+    
+      <category term="WindowsDriver" scheme="https://likte.me/tags/WindowsDriver/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Windows内核编程之字符串操作</title>
+    <link href="https://likte.me/Windows_Kernel_String_Operations.html"/>
+    <id>https://likte.me/Windows_Kernel_String_Operations.html</id>
+    <published>2019-03-31T07:34:40.000Z</published>
+    <updated>2019-04-02T07:22:02.003Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;ANSI字符串&quot;&gt;&lt;a href=&quot;#ANSI字符串&quot; class=&quot;headerlink&quot; title=&quot;ANSI字符串&quot;&gt;&lt;/a&gt;ANSI字符串&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;函数功能&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;内核版&lt;/th&gt;
+&lt;th style=&quot;text-align:center&quot;&gt;应用版&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串长度&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlStringCbLengthA&lt;br&gt;RtlStringCchLengthA&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;strlen&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串拼接&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlStringCbCatA&lt;br&gt;RtlStringCbCatExA&lt;br&gt;RtlStringCchCatA&lt;br&gt;RtlStringCchCatExA&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;strcat&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;指定数目字符串拼接&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlStringCbCatNA&lt;br&gt;RtlStringCbCatNExA&lt;br&gt;RtlStringCchCatNA&lt;br&gt;RtlStringCchCatNExA&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;strncat&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串拷贝&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlCopyString&lt;br&gt;RtlStringCbCopyA&lt;br&gt;RtlStringCbCopyExA&lt;br&gt;RtlStringCchCopyA&lt;br&gt;RtlStringCchCopyExA&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;strcpy&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;指定数目字符串拷贝&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlStringCbCopyNA&lt;br&gt;RtlStringCbCopyNExA&lt;br&gt;RtlStringCchCopyNA&lt;br&gt;RtlStringCchCopyNExA&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;strncpy&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串比较&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlCompareString&lt;br&gt;RtlEqualString&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;strcmp&lt;br&gt;strncmp&lt;br&gt;_stricmp&lt;br&gt;_strnicmp&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串初始化&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlInitString&lt;br&gt;RtlInitAnsiString&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;_strset&lt;br&gt;_strnset&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串大小写&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlUpperString&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;_strlwr&lt;br&gt;_strupr&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符大小写&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlUpperChar&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;isdigit&lt;br&gt;islower&lt;br&gt;isprint&lt;br&gt;isspace&lt;br&gt;isupper&lt;br&gt;isxdigit&lt;br&gt;tolower&lt;br&gt;toupper&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串格式化&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlStringCbPrintfA&lt;br&gt;RtlStringCbPrintfExA&lt;br&gt;RtlStringCchPrintfA&lt;br&gt;RtlStringCchPrintfExA&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;sprintf&lt;br&gt;_snprintf&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;可变字符串格式化&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlStringCbVPrintfA&lt;br&gt;RtlStringCbVPrintfExA&lt;br&gt;RtlStringCchVPrintfA&lt;br&gt;RtlStringCchVPrintfExA&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;vsprintf&lt;br&gt;_vsnprintf&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串转数字&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;A版转W版&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlAnsiStringToUnicodeSize&lt;br&gt;RtlAnsiStringToUnicodeString&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;atoi&lt;br&gt;atol&lt;br&gt;_itoa&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串逆转&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;_strrev&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;字符串内存释放&lt;/td&gt;
+&lt;td style=&quot;text-align:center&quot;&gt;RtlFreeAnsiString&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+    
+    </summary>
+    
+      <category term="Windows驱动开发" scheme="https://likte.me/categories/Windows%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/"/>
+    
+    
+      <category term="WindowsDriver" scheme="https://likte.me/tags/WindowsDriver/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Windows双机调试环境搭建</title>
+    <link href="https://likte.me/WindowsDualDebuggingEnvConfiguration.html"/>
+    <id>https://likte.me/WindowsDualDebuggingEnvConfiguration.html</id>
+    <published>2019-03-27T10:42:33.000Z</published>
+    <updated>2019-03-27T12:09:21.883Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;搭建过程&quot;&gt;&lt;a href=&quot;#搭建过程&quot; class=&quot;headerlink&quot; title=&quot;搭建过程&quot;&gt;&lt;/a&gt;搭建过程&lt;/h2&gt;&lt;p&gt;首先我们谷歌VirtualKD一般第一个为官网(VirtualKD官网不是https所以就不放出来了)，然后下载VirtualKD并安装到实体机，目前官方最新版3.0&lt;/p&gt;
+&lt;img src=&quot;/WindowsDualDebuggingEnvConfiguration/1.jpg&quot; title=&quot;This is an example image&quot;&gt;
+    
+    </summary>
+    
+      <category term="Windows驱动开发" scheme="https://likte.me/categories/Windows%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/"/>
+    
+    
+      <category term="WinDbg" scheme="https://likte.me/tags/WinDbg/"/>
+    
+      <category term="VirtualKD" scheme="https://likte.me/tags/VirtualKD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>安装并配置WDK7600编译Windows驱动程序</title>
+    <link href="https://likte.me/USE_WDK7600_CompileWindowsDrivers.html"/>
+    <id>https://likte.me/USE_WDK7600_CompileWindowsDrivers.html</id>
+    <published>2019-03-26T13:20:26.000Z</published>
+    <updated>2019-03-27T05:07:59.797Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;下载WDK7600&quot;&gt;&lt;a href=&quot;#下载WDK7600&quot; class=&quot;headerlink&quot; title=&quot;下载WDK7600&quot;&gt;&lt;/a&gt;下载WDK7600&lt;/h2&gt;&lt;p&gt;谷歌输入wdk7600找到微软官方的&lt;a href=&quot;https://www.microsoft.com/en-us/download/details.aspx?id=11800&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;下载地址&lt;/a&gt;点击进入&lt;/p&gt;
+&lt;img src=&quot;/USE_WDK7600_CompileWindowsDrivers/1.jpg&quot; title=&quot;This is an example image&quot;&gt;
+    
+    </summary>
+    
+      <category term="Windows驱动开发" scheme="https://likte.me/categories/Windows%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/"/>
+    
+    
+      <category term="WindowsDriver" scheme="https://likte.me/tags/WindowsDriver/"/>
+    
+      <category term="WDK7600" scheme="https://likte.me/tags/WDK7600/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>WinDbg命令及使用</title>
+    <link href="https://likte.me/WinDbg_Command.html"/>
+    <id>https://likte.me/WinDbg_Command.html</id>
+    <published>2019-03-07T07:04:01.000Z</published>
+    <updated>2019-03-20T05:55:00.783Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;推荐资料&lt;a href=&quot;https://bbs.pediy.com/thread-178808-1.htm&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;看雪论坛WINDBG参考手册V0.6&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;本文章主要记录WinDbg常用的命令和使用技巧等，会持续更新&lt;/p&gt;
+&lt;h2 id=&quot;符号相关命令&quot;&gt;&lt;a href=&quot;#符号相关命令&quot; class=&quot;headerlink&quot; title=&quot;符号相关命令&quot;&gt;&lt;/a&gt;符号相关命令&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;重新加载符号：&lt;code&gt;.reload&lt;/code&gt;、&lt;code&gt;!reload&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;查看符号路径：&lt;code&gt;.sympath&lt;/code&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;0:000&amp;gt; .sympath&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Symbol search path is: srv*c:\symbolslocal*http://msdl.microsoft.com/download/symbols&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Expanded Symbol search path is: srv*c:\symbolslocal*http://msdl.microsoft.com/download/symbols&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;加载符号：&lt;code&gt;ld CrashMe&lt;/code&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;0:000&amp;gt; ld CrashMe&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Symbols already loaded for CrashMe&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;0:000&amp;gt; lm m CrashMe&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;start    end        module name&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;00400000 006d2000   CrashMe  C (private pdb symbols)  C:\Users\Likte\Desktop\CrashMe\debug\CrashMe.pdb&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+    
+    </summary>
+    
+      <category term="安全工具" scheme="https://likte.me/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/"/>
+    
+    
+      <category term="WinDbg" scheme="https://likte.me/tags/WinDbg/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>i春秋CTF大本营竞赛训练Reverse解题</title>
+    <link href="https://likte.me/ichunqiu_CTF.html"/>
+    <id>https://likte.me/ichunqiu_CTF.html</id>
+    <published>2019-03-01T06:41:46.000Z</published>
+    <updated>2019-03-20T05:54:48.748Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;Level-1&quot;&gt;&lt;a href=&quot;#Level-1&quot; class=&quot;headerlink&quot; title=&quot;Level 1&quot;&gt;&lt;/a&gt;Level 1&lt;/h2&gt;&lt;p&gt;从分值最低的开始做，第三届上海市大学生网络安全大赛的题目名称：crackme&lt;/p&gt;
+&lt;p&gt;拿到程序后首先用LoadPE查看程序的导入表发现只有LoadLibraryA，GetProcAddress等函数可以推断此程序应该是加壳了&lt;/p&gt;
+&lt;img src=&quot;/ichunqiu_CTF/1.png&quot; title=&quot;This is an example image&quot;&gt;
+    
+    </summary>
+    
+      <category term="CTF" scheme="https://likte.me/categories/CTF/"/>
+    
+    
+      <category term="CTF" scheme="https://likte.me/tags/CTF/"/>
+    
+      <category term="Reverse" scheme="https://likte.me/tags/Reverse/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Anatova勒索病毒详细分析</title>
+    <link href="https://likte.me/Anatova_Ransomware_analysis.html"/>
+    <id>https://likte.me/Anatova_Ransomware_analysis.html</id>
+    <published>2019-02-28T11:36:07.000Z</published>
+    <updated>2019-06-04T08:42:43.343Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;strong&gt;注意：本文为本人原创，首发来自于&lt;a href=&quot;https://www.anquanke.com/post/id/171485&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;安全客&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;在今年1月22日&lt;a href=&quot;https://securingtomorrow.mcafee.com/other-blogs/mcafee-labs/happy-new-year-2019-anatova-is-here/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;McAfee官方博客&lt;/a&gt;发布文章称在发现了一个私有的点对点(p2p)网络中被发现一个新的勒索软件系列，并根据留下的勒索信息命名为Anatova，具体更多详情可以查看原文，故此对Anatova勒索病毒进行一番分析。&lt;/p&gt;
+&lt;h1 id=&quot;样本运行流程图&quot;&gt;&lt;a href=&quot;#样本运行流程图&quot; class=&quot;headerlink&quot; title=&quot;样本运行流程图&quot;&gt;&lt;/a&gt;样本运行流程图&lt;/h1&gt;&lt;p&gt;样本大概运行流程，3个阶段是我对于函数行为所作出的判断&lt;br&gt;&lt;img src=&quot;/Anatova_Ransomware_analysis/liucheng1.png&quot; title=&quot;This is an example image&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="病毒分析" scheme="https://likte.me/categories/%E7%97%85%E6%AF%92%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="Anatova" scheme="https://likte.me/tags/Anatova/"/>
+    
+      <category term="勒索病毒" scheme="https://likte.me/tags/%E5%8B%92%E7%B4%A2%E7%97%85%E6%AF%92/"/>
+    
+      <category term="样本分析" scheme="https://likte.me/tags/%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90/"/>
+    
+      <category term="逆向分析" scheme="https://likte.me/tags/%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CVE-2018-2025[0-3] WinRAR代码执行漏洞复现</title>
+    <link href="https://likte.me/WinRAR_CVE_2018_2025%5B0_3%5D.html"/>
+    <id>https://likte.me/WinRAR_CVE_2018_2025[0_3].html</id>
+    <published>2019-02-24T03:45:22.000Z</published>
+    <updated>2019-03-22T11:12:50.483Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;0x00-前言&quot;&gt;&lt;a href=&quot;#0x00-前言&quot; class=&quot;headerlink&quot; title=&quot;0x00 前言&quot;&gt;&lt;/a&gt;0x00 前言&lt;/h2&gt;&lt;p&gt;在2019-2-20日安全研究员&lt;a href=&quot;https://twitter.com/NadavGrossman&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Nadav Grossman&lt;/a&gt;公开披露了他在WinRAR中的一系列漏洞CVE-2018-2025[0-3]，并分享了他是如何漏洞并实现利用漏洞过程的&lt;a href=&quot;https://research.checkpoint.com/extracting-code-execution-from-winrar/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;文章&lt;/a&gt;。&lt;/p&gt;
+&lt;h2 id=&quot;0x01-漏洞成因&quot;&gt;&lt;a href=&quot;#0x01-漏洞成因&quot; class=&quot;headerlink&quot; title=&quot;0x01 漏洞成因&quot;&gt;&lt;/a&gt;0x01 漏洞成因&lt;/h2&gt;&lt;img src=&quot;/WinRAR_CVE_2018_2025[0_3]/1.jpg&quot; title=&quot;This is an example image&quot;&gt;
+&lt;p&gt;漏洞成因在于WinRAR等系列软件使用了一个ACE文件的解压模块UNACEV2.DLL造成，该DLL没有任何的漏洞缓解机制保护，该DLL在解压过程中对文件相对路径的过滤未能正确处理，导致可以将恶意软件解压到关键目录实现开机自启，实现远程代码执行或者NTLM hash泄露。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="漏洞分析" scheme="https://likte.me/categories/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="WinRAR" scheme="https://likte.me/tags/WinRAR/"/>
+    
+      <category term="代码执行" scheme="https://likte.me/tags/%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
+    
+      <category term="CVE-2018-20250" scheme="https://likte.me/tags/CVE-2018-20250/"/>
+    
+      <category term="CVE-2018-20251" scheme="https://likte.me/tags/CVE-2018-20251/"/>
+    
+      <category term="CVE-2018-20252" scheme="https://likte.me/tags/CVE-2018-20252/"/>
+    
+      <category term="CVE-2018-20253" scheme="https://likte.me/tags/CVE-2018-20253/"/>
+    
+      <category term="UNACEV2.DLL" scheme="https://likte.me/tags/UNACEV2-DLL/"/>
+    
+      <category term="ACE" scheme="https://likte.me/tags/ACE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Diary</title>
+    <link href="https://likte.me/diary.html"/>
+    <id>https://likte.me/diary.html</id>
+    <published>2019-02-12T08:19:05.000Z</published>
+    <updated>2019-04-13T06:07:27.436Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;2019-2-12&quot;&gt;&lt;a href=&quot;#2019-2-12&quot; class=&quot;headerlink&quot; title=&quot;2019-2-12&quot;&gt;&lt;/a&gt;2019-2-12&lt;/h2&gt;&lt;p&gt;今天主要将博客给配置好了，以后要多写博客.&lt;/p&gt;
+&lt;p&gt;最近看到了一个”tittytainment”理论，不管这个理论是否是阴谋论我认为我们都应该从现在开始努力扔掉嘴中的奶嘴.&lt;/p&gt;
+&lt;p&gt;下方图片为”tittytainment”理论&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="日记" scheme="https://likte.me/categories/%E6%97%A5%E8%AE%B0/"/>
+    
+    
+      <category term="随心日记" scheme="https://likte.me/tags/%E9%9A%8F%E5%BF%83%E6%97%A5%E8%AE%B0/"/>
+    
+  </entry>
+  
+</feed>

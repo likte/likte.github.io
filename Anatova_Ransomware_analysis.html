@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="注意：本文为本人原创，首发来自于安全客 前言在今年1月22日McAfee官方博客发布文章称在发现了一个私有的点对点(p2p)网络中被发现一个新的勒索软件系列，并根据留下的勒索信息命名为Anatova，具体更多详情可以查看原文，故此对Anatova勒索病毒进行一番分析。 样本运行流程图样本大概运行流程，3个阶段是我对于函数行为所作出的判断">
+<meta name="keywords" content="Anatova,勒索病毒,样本分析,逆向分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Anatova勒索病毒详细分析">
+<meta property="og:url" content="https://likte.me/Anatova_Ransomware_analysis.html">
+<meta property="og:site_name" content="Likte&#39;s Blog">
+<meta property="og:description" content="注意：本文为本人原创，首发来自于安全客 前言在今年1月22日McAfee官方博客发布文章称在发现了一个私有的点对点(p2p)网络中被发现一个新的勒索软件系列，并根据留下的勒索信息命名为Anatova，具体更多详情可以查看原文，故此对Anatova勒索病毒进行一番分析。 样本运行流程图样本大概运行流程，3个阶段是我对于函数行为所作出的判断">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/liucheng1.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/liucheng2.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/1.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/2.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/3.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/4.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/5.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/6.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/7.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/8.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/9.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/10.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/11.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/12.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/13.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/14.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/15.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/16.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/17.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/18.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/19.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/20.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/21.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/22.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/23.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/24.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/25.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/26.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/27.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/28.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/29.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/30.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/31.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/32.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/33.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/34.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/35.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/36.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/37.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/38.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/39.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/40.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/41.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/42.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/43.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/44.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/45.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/46.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/47.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/48.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/49.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/50.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/51.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/52.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/53.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/54.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/55.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/56.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/57.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/58.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/59.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/60.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/61.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/62.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/63.png">
+<meta property="og:image" content="https://likte.me/Anatova_Ransomware_analysis/64.png">
+<meta property="og:updated_time" content="2019-06-04T08:42:43.343Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Anatova勒索病毒详细分析">
+<meta name="twitter:description" content="注意：本文为本人原创，首发来自于安全客 前言在今年1月22日McAfee官方博客发布文章称在发现了一个私有的点对点(p2p)网络中被发现一个新的勒索软件系列，并根据留下的勒索信息命名为Anatova，具体更多详情可以查看原文，故此对Anatova勒索病毒进行一番分析。 样本运行流程图样本大概运行流程，3个阶段是我对于函数行为所作出的判断">
+<meta name="twitter:image" content="https://likte.me/Anatova_Ransomware_analysis/liucheng1.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Likte's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://likte.me/Anatova_Ransomware_analysis.html">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Anatova勒索病毒详细分析 | Likte's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Likte's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://likte.me/Anatova_Ransomware_analysis.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Likte">
+      <meta itemprop="description" content="Have you tried your best?">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Likte's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Anatova勒索病毒详细分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+		
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-02-28 19:36:07" itemprop="dateCreated datePublished" datetime="2019-02-28T19:36:07+08:00">2019-02-28</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-04 16:42:43" itemprop="dateModified" datetime="2019-06-04T16:42:43+08:00">2019-06-04</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/病毒分析/" itemprop="url" rel="index"><span itemprop="name">病毒分析</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <a href="/Anatova_Ransomware_analysis.html#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/Anatova_Ransomware_analysis.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+      
+      
+
+      
+        <p><strong>注意：本文为本人原创，首发来自于<a href="https://www.anquanke.com/post/id/171485" target="_blank" rel="noopener">安全客</a></strong></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在今年1月22日<a href="https://securingtomorrow.mcafee.com/other-blogs/mcafee-labs/happy-new-year-2019-anatova-is-here/" target="_blank" rel="noopener">McAfee官方博客</a>发布文章称在发现了一个私有的点对点(p2p)网络中被发现一个新的勒索软件系列，并根据留下的勒索信息命名为Anatova，具体更多详情可以查看原文，故此对Anatova勒索病毒进行一番分析。</p>
+<h1 id="样本运行流程图"><a href="#样本运行流程图" class="headerlink" title="样本运行流程图"></a>样本运行流程图</h1><p>样本大概运行流程，3个阶段是我对于函数行为所作出的判断<br><img src="/Anatova_Ransomware_analysis/liucheng1.png" title="This is an example image"></p>
+<a id="more"></a>
+<p>具体加密流程图<br><img src="/Anatova_Ransomware_analysis/liucheng2.png" title="This is an example image"></p>
+<h1 id="样本IOCs"><a href="#样本IOCs" class="headerlink" title="样本IOCs"></a>样本IOCs</h1><p>样本大小：314368 bytes<br>CRC32：49CF3E45<br>MD5: 596EBE227DCD03863E0A740B6C605924<br>SHA1: 37FADC40D6DC787CB13EF11663A9BC97C79B8F48<br>SHA256: 170FB7438316F7335F34FA1A431AFC1676A786F1AD9DEE63D78C3F5EFD3A0AC0</p>
+<h1 id="行为分析"><a href="#行为分析" class="headerlink" title="行为分析"></a>行为分析</h1><p>这4个都是我获得的Anatova1.0勒索病毒的样本，都请求了管理员权限运行，样本图标都伪装成了游戏或者应用程序，样本的逻辑大致都相同，截至目前为止4个样本的多病毒引擎查杀率不尽相同，最高的一个样本有10个杀毒引擎查杀最低的样本只有4个杀毒引擎查杀<br><img src="/Anatova_Ransomware_analysis/1.png" title="This is an example image"></p>
+<p>遍历全盘文件进行加密并在加密成功路径下留下ANATOVA.txt勒索信息<br><img src="/Anatova_Ransomware_analysis/2.png" title="This is an example image"></p>
+<p>此为留下的勒索信息，根据勒索内容我们需要支付10个达世币才能解密我们的文件，按照现在的行情来说10个达世币价值5800RMB左右，我们可以发送200kb的JGP图片文件免费解密测试<br><img src="/Anatova_Ransomware_analysis/3.png" title="This is an example image"></p>
+<p>被加密后的文件<br><img src="/Anatova_Ransomware_analysis/4.png" title="This is an example image"></p>
+<p>一切动作执行完毕之后调用执行CMD命令行自我删除<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:Windows\system32\cmd.exe /c timeout -c 9 &amp; del C:\vir\self.exe /f /q</span><br></pre></td></tr></table></figure></p>
+<p>这条CMD命令的任务就是启动CMD命令行9秒之后执行删除路径中的文件，/f 强制删除只读文件，/q 安静模式删除全局通配符时不要求确认<br><img src="/Anatova_Ransomware_analysis/5.png" title="This is an example image"></p>
+<h1 id="恶意代码分析"><a href="#恶意代码分析" class="headerlink" title="恶意代码分析"></a>恶意代码分析</h1><p>EXEINFO查看样本是64位程序编译日期为2019-01-01，链接器版本位6.0应该是为VC6编译<br><img src="/Anatova_Ransomware_analysis/6.png" title="This is an example image"></p>
+<p>我们用IDA查看样本的导入表可以发现GetModuleHandleW，GetProAddress，LoadLibraryW这三个API可以判断使用到的函数地址都是通过这三个API组合获取<br><img src="/Anatova_Ransomware_analysis/7.png" title="This is an example image"></p>
+<h2 id="解决IDA反编译失败问题"><a href="#解决IDA反编译失败问题" class="headerlink" title="解决IDA反编译失败问题"></a>解决IDA反编译失败问题</h2><p>在我们使用IDA静态分析的话不管是使用IDA6.8还是7.0或者是McAfee的分析师使用的最新IDA7.2版本都会出现错误导致反编译失败，并且函数都会识别出错一个好好的函数硬生生给截断了两个函数，如下图所示的sub_406C7B函数本来是一个函数，但是在函数开头开辟堆栈之后函数就被截断了，然后剩下的函数体又被IDA识别为了另一个函数，这可能是作者搞的鬼也可能是IDA的缺陷造成的<br><img src="/Anatova_Ransomware_analysis/8.png" title="This is an example image"></p>
+<p>这对于我们进行静态分析和身为强迫症的我来说太难受了，如是乎在查阅了一大堆资料之后，找到了能够解决的方法，首先我们点击sub_406C70函数然后按快捷键D将代码转为数据，点击确认之后sub_406C7B函数也是一样的操作<br><img src="/Anatova_Ransomware_analysis/9.png" title="This is an example image"></p>
+<p>下图为转换成数据之后的两个函数<br><img src="/Anatova_Ransomware_analysis/10.png" title="This is an example image"></p>
+<p>之后我们再将转换为数据的两个函数按C快捷键再转换为代码<br><img src="/Anatova_Ransomware_analysis/11.png" title="This is an example image"></p>
+<p>接下来我们在已经转换为代码的sub_406C7B函数右键选择创建函数.<br><img src="/Anatova_Ransomware_analysis/12.png" title="This is an example image"></p>
+<p>现在为止sub_406C7B已经可以正常识别为一个函数了，其他出现问题的函数都按照此方式修复即可<br><img src="/Anatova_Ransomware_analysis/13.png" title="This is an example image"></p>
+<p>大多数字符串是经过某种加密的，除了作者的达世币地址和两个邮箱之外<br><img src="/Anatova_Ransomware_analysis/14.png" title="This is an example image"></p>
+<h2 id="初始化阶段恶意代码分析"><a href="#初始化阶段恶意代码分析" class="headerlink" title="初始化阶段恶意代码分析"></a>初始化阶段恶意代码分析</h2><p>我们使用IDA查看伪代码此为病毒样本初始化阶段的函数调用，main函数开始首先调用了一个空函数无任何功能，因为之后的函数调用逻辑比较多故此我会在下方对函数内部逐一进行详细分析<br><img src="/Anatova_Ransomware_analysis/15.png" title="This is an example image"></p>
+<p>此图为DecodeKernel32DllStrAndGetFunAddress函数内部，此函数解密了异或加密的dll和函数字符串，然后获取Kernel32模块基址并使用GetProcAddress获取Kernel32模块中的29个函数地址<br><img src="/Anatova_Ransomware_analysis/16.png" title="This is an example image"></p>
+<p>此图为DecodeSysDllString函数内部逻辑，函数功能已经逐行注释了<br><img src="/Anatova_Ransomware_analysis/17.png" title="This is an example image"></p>
+<p>调用DecodeSysDllString函数后解密的Kernel32字符串<br><img src="/Anatova_Ransomware_analysis/18.png" title="This is an example image"></p>
+<p>循环29次解密29个异或加密的函数字符串<br><img src="/Anatova_Ransomware_analysis/19.png" title="This is an example image"></p>
+<p>i的值和要获取对应函数地址的函数指针一一对应<br><img src="/Anatova_Ransomware_analysis/20.png" title="This is an example image"></p>
+<p>获取第一个函数地址并赋值给函数指针<br><img src="/Anatova_Ransomware_analysis/21.png" title="This is an example image"></p>
+<p>获取完函数地址之后判断29个函数地址是否都获取成功如果有任何一个函数获取不成功退出进行清理流程<br><img src="/Anatova_Ransomware_analysis/22.png" title="This is an example image"></p>
+<p>接下来主要先禁用了Windows错误通知，之后创建互斥体确保系统中只有一个病毒样本实例运行，之后的3个Decodexxxx函数和上面详细分析过的DecodeKernel32DllStrAndGetFunAddress函数功能都一样只不过是获取另外3个dll中的函数地址罢了，所以就不详细分析函数内部逻辑了<br><img src="/Anatova_Ransomware_analysis/23.png" title="This is an example image"></p>
+<p>接下来两个函数分别检查了当前系统登陆用户名和系统语言<br><img src="/Anatova_Ransomware_analysis/24.png" title="This is an example image"></p>
+<p>此图为DecodeAndCheckUserName函数内部逻辑主要使用GetUserNameW函数获取当前系统登陆用户名并和列表中的用户名对比，对比如果和其中之一相同就退出并进行清理流程，此举为了防止分析人员将恶意样本在某些沙箱中运行<br><img src="/Anatova_Ransomware_analysis/25.png" title="This is an example image"></p>
+<p>此图为CheckSystemLanguage函数内部逻辑，GetSystemDefaultUILanguage函数获取的是安装系统时第一个安装的语言，作者将这些国家排除在勒索范围之外要么就是作者就是来自这其中的国家之一，否则就另有所图了<br><img src="/Anatova_Ransomware_analysis/26.png" title="This is an example image"></p>
+<p>完成检查操作系统语言之后样本会判断一个标志如果为TRUE才会执行LoadExtendDll函数，在此样本中此标志永远为FALSE所以永远不会执行，所以此功能是为了后续版本扩展模块用<br><img src="/Anatova_Ransomware_analysis/27.png" title="This is an example image"></p>
+<p>此图为LoadExtendDll函数内部主要解密了两个dll模块名称并加载这两个模块<br><img src="/Anatova_Ransomware_analysis/28.png" title="This is an example image"></p>
+<p>接下来分析EnumAndKillProcess函数，此函数主要逻辑就是使用windows下遍历进程的API组合遍历当前系统进程并和名单列表中的26个进程进行对比如果有相同的进行就结束，此举主要为了后续能供顺利进行加密做铺垫<br><img src="/Anatova_Ransomware_analysis/29.png" title="This is an example image"></p>
+<p>此图为遍历到的第一个进程和名单内第一个进程对比<br><img src="/Anatova_Ransomware_analysis/30.png" title="This is an example image"></p>
+<p>名单中要结束26个进程如下图<br><img src="/Anatova_Ransomware_analysis/31.png" title="This is an example image"></p>
+<h2 id="加密阶段恶意代码分析"><a href="#加密阶段恶意代码分析" class="headerlink" title="加密阶段恶意代码分析"></a>加密阶段恶意代码分析</h2><p>加密阶段调用了下图的3个函数实现，待我在下方进行详细分析<br><img src="/Anatova_Ransomware_analysis/32.png" title="This is an example image"></p>
+<p>我们分析CreatRandRsaKey函数内部，主要就是生成了一对RSA密钥并导出<br><img src="/Anatova_Ransomware_analysis/33.png" title="This is an example image"></p>
+<p>此为导出的RSA公钥<br><img src="/Anatova_Ransomware_analysis/34.png" title="This is an example image"></p>
+<p>导出RSA私钥<br><img src="/Anatova_Ransomware_analysis/35.png" title="This is an example image"></p>
+<p>接下来分析ImportRsaKeyAndEncodeRandKey函数，先使用IDA查看大概的函数逻辑，稍后我会进行动态调式<br><img src="/Anatova_Ransomware_analysis/36.png" title="This is an example image"></p>
+<p>调用CryptGenRandom生成32字节随机密钥当作Salsa20算法key<br><img src="/Anatova_Ransomware_analysis/37.png" title="This is an example image"></p>
+<p>生成第二个8字节的随机密钥当作Salsa20算法IV<br><img src="/Anatova_Ransomware_analysis/38.png" title="This is an example image"></p>
+<p>调用Salsa20算法加密导出的RSA私钥<br><img src="/Anatova_Ransomware_analysis/39.png" title="This is an example image"></p>
+<p>加密后的buffer<br><img src="/Anatova_Ransomware_analysis/40.png" title="This is an example image"></p>
+<p>解密作者硬编码的RSA公钥Buffer<br><img src="/Anatova_Ransomware_analysis/41.png" title="This is an example image"></p>
+<p>解密完毕RSA公钥<br><img src="/Anatova_Ransomware_analysis/42.png" title="This is an example image"></p>
+<p>导入刚才解密的RSA公钥并对之前用来加密导出RSA私钥的Salsa20算法key进行加密<br><img src="/Anatova_Ransomware_analysis/43.png" title="This is an example image"></p>
+<p>同理加密Salsa20算法IV<br><img src="/Anatova_Ransomware_analysis/44.png" title="This is an example image"></p>
+<p>将三个加密完后的buffer拷贝到一起<br><img src="/Anatova_Ransomware_analysis/45.png" title="This is an example image"></p>
+<p>之后使用CryptBinaryToStringA函数对buffer进行Base64编码<br><img src="/Anatova_Ransomware_analysis/46.png" title="This is an example image"></p>
+<p>接下来分析主要的EncryptionFilesFun函数，此函数主要判断可用的磁盘并对可用磁盘进行全盘加密，对网络磁盘也会进行加密<br><img src="/Anatova_Ransomware_analysis/47.png" title="This is an example image"></p>
+<p>EnumAllFiles函数内部主要就是遍历全盘并加密<br><img src="/Anatova_Ransomware_analysis/48.png" title="This is an example image"></p>
+<p>此为ExcludeSysPath函数内部主要排除对列表中的9个文件夹的加密<br><img src="/Anatova_Ransomware_analysis/49.png" title="This is an example image"></p>
+<p>此函数为CryptEncryptFileDate函数内部主要逻辑，我们可以查看函数大概逻辑<br><img src="/Anatova_Ransomware_analysis/50.png" title="This is an example image"></p>
+<p>ExcludeFilePath函数检查并排除列表中16个文件的加密<br><img src="/Anatova_Ransomware_analysis/51.png" title="This is an example image"></p>
+<p>FileExtensionCheck函数对要加密文件的扩展名做检查排除对列表中的37个类别文件扩展名进行加密<br><img src="/Anatova_Ransomware_analysis/52.png" title="This is an example image"></p>
+<p>后缀名检查函数逻辑<br><img src="/Anatova_Ransomware_analysis/53.png" title="This is an example image"></p>
+<p>打开确认要加密的文件之后会对比文件末尾的记号防止二次加密<br><img src="/Anatova_Ransomware_analysis/54.png" title="This is an example image"></p>
+<p>使用随机生成的Salsa20算法key和IV对文件内容进行加密<br><img src="/Anatova_Ransomware_analysis/55.png" title="This is an example image"></p>
+<p>此Buffer为用来加密当前文件的Salsa20算法Key和IV，使用RSA加密之后<br><img src="/Anatova_Ransomware_analysis/56.png" title="This is an example image"></p>
+<p>在将加密后文件内容，加密后的Salsa20算法Key和IV和文件大小，481写入文件后，将4字节加密记号写入文件末尾<br><img src="/Anatova_Ransomware_analysis/57.png" title="This is an example image"></p>
+<p>接下来调用CreateBlackMailTxt函数在当前被加密文件路径下留下勒索信息，主要逻辑代码注释都在图中就不再解释了，接下来我们查看被加密后的文件<br><img src="/Anatova_Ransomware_analysis/58.png" title="This is an example image"></p>
+<p>此图为加密后文件内容，和我们分析代码时写入的内容相同，至此勒索病毒的主要逻辑分析完毕接下来就是清理阶段<br><img src="/Anatova_Ransomware_analysis/59.png" title="This is an example image"></p>
+<h2 id="清理阶段恶意代码分析"><a href="#清理阶段恶意代码分析" class="headerlink" title="清理阶段恶意代码分析"></a>清理阶段恶意代码分析</h2><p>此为清理阶段的主要3个函数<br><img src="/Anatova_Ransomware_analysis/60.png" title="This is an example image"></p>
+<p>DelVolumeShadow函数内部<br><img src="/Anatova_Ransomware_analysis/61.png" title="This is an example image"></p>
+<p>SelfDelete函数内部，延迟9秒删除自身文件为了后续清空自身内存留时间<br><img src="/Anatova_Ransomware_analysis/62.png" title="This is an example image"></p>
+<p>CleanUpEnvironment函数清空了用到的各种密钥，还有将所动态获取的函数地址清空<br><img src="/Anatova_Ransomware_analysis/63.png" title="This is an example image"></p>
+<p>最后一步清空程序所有函数代码的内存<br><img src="/Anatova_Ransomware_analysis/64.png" title="This is an example image"></p>
+<h1 id="编写Yara规则"><a href="#编写Yara规则" class="headerlink" title="编写Yara规则"></a>编写Yara规则</h1><p>根据获取到的Anatova系列样本编写的规则1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">rule Anatovaone</span><br><span class="line">&#123;</span><br><span class="line">    strings:</span><br><span class="line">        $Ana_Mail_string1 = &quot;anatoday@tutanota.com&quot;</span><br><span class="line">        $Ana_Mail_string2 = &quot;anatova1@tutanota.com&quot;</span><br><span class="line">        $Ana_Mail_string3 = &quot;anatova2@tutanota.com&quot;</span><br><span class="line">        $Ana_DASHA_string1 = &quot;XpRvUwSjSeHfJqLePsRfQtCKa1VMwaXh12&quot;</span><br><span class="line">        $Ana_DASHA_string2 = &quot;XktLWbv68EU9XhYBuvrAGtbZHronyJDt1L&quot;</span><br><span class="line">    condition:</span><br><span class="line">        $Ana_Mail_string1 or $Ana_Mail_string2 or $Ana_Mail_string3 or $Ana_DASHA_string1 or $Ana_DASHA_string2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据获取到的Anatova系列样本编写的规则2，这两个规则都可以对Anatova1.0系列样本进行查杀</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">rule Anatovatwo</span><br><span class="line">&#123;</span><br><span class="line">    strings:</span><br><span class="line">        $Ana_Hex_string = &#123;28 28 28 4E 40 5C 28 28 28&#125;</span><br><span class="line">        $Ana_string2 = &quot;Ixsz~Hcdkxs^eY~xcdmK&quot;</span><br><span class="line">    condition:</span><br><span class="line">        all of them</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Anatova勒索病毒系列使用了游戏和软件的图标来伪装，以达到可以诱导用户下载运行的目的，此样本使用了Salsa20算法对文件进行加密并且最多就加密1M大小的文件内容实现了快速加密的目的，Anatova勒索病毒作者对内存的比较深入加大了分析人员进行分析的难度，我认为除非通过某些手段获取作者手上的RSA私钥否则其他方式进行解密的可能性不大，此1.0版本代码做了模块化为后面版本进行扩展功能，所以后续版本的更新威胁会比1.0版本大得多，对于应对此类勒索病毒唯一的解决方案只有预防了，备份备份再备份，安装杀毒软件并且升级最新的病毒库可以进行预防，不要打开不明来历的程序一定要用的话最好先放在虚拟机或者上传在线沙箱查看程序行为。</p>
+<hr>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+	<div>
+	  
+        <div>
+    
+        <div style="text-align:center;color: #636363;font-size:14px;letter-spacing: 10px">本文结束啦<i class="fa fa-bell"></i>感谢您的阅读</div>
+    
+</div>
+      
+    </div>
+<div>    
+ 
+ 
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+	  <strong>本文作者：</strong> Likte
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/Anatova_Ransomware_analysis.html" title="Anatova勒索病毒详细分析">https://likte.me/Anatova_Ransomware_analysis.html</a>
+  </li>
+  <li class="post-copyright-license">
+	<strong>版权声明： </strong>
+    本站文章均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议，转载注明出处链接及作者！
+  </li>
+</ul>
+
+</div>
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Anatova/" rel="tag"># Anatova</a>
+          
+            <a href="/tags/勒索病毒/" rel="tag"># 勒索病毒</a>
+          
+            <a href="/tags/样本分析/" rel="tag"># 样本分析</a>
+          
+            <a href="/tags/逆向分析/" rel="tag"># 逆向分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/WinRAR_CVE_2018_2025[0_3].html" rel="next" title="CVE-2018-2025[0-3] WinRAR代码执行漏洞复现">
+                <i class="fa fa-chevron-left"></i> CVE-2018-2025[0-3] WinRAR代码执行漏洞复现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/ichunqiu_CTF.html" rel="prev" title="i春秋CTF大本营竞赛训练Reverse解题">
+                i春秋CTF大本营竞赛训练Reverse解题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Likte">
+            
+              <p class="site-author-name" itemprop="name">Likte</p>
+              <p class="site-description motion-element" itemprop="description">Have you tried your best?</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/likte" title="GitHub &rarr; https://github.com/likte" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:likte@protonmail.com" title="E-Mail &rarr; mailto:likte@protonmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+             <div class="cc-license motion-element" itemprop="license">
+              
+                
+              
+              
+              
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+             </div>
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#样本运行流程图"><span class="nav-number">2.</span> <span class="nav-text">样本运行流程图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#样本IOCs"><span class="nav-number">3.</span> <span class="nav-text">样本IOCs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#行为分析"><span class="nav-number">4.</span> <span class="nav-text">行为分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#恶意代码分析"><span class="nav-number">5.</span> <span class="nav-text">恶意代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#解决IDA反编译失败问题"><span class="nav-number">5.1.</span> <span class="nav-text">解决IDA反编译失败问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化阶段恶意代码分析"><span class="nav-number">5.2.</span> <span class="nav-text">初始化阶段恶意代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加密阶段恶意代码分析"><span class="nav-number">5.3.</span> <span class="nav-text">加密阶段恶意代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#清理阶段恶意代码分析"><span class="nav-number">5.4.</span> <span class="nav-text">清理阶段恶意代码分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#编写Yara规则"><span class="nav-number">6.</span> <span class="nav-text">编写Yara规则</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Likte</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'xztdFLMG5uSSCyctC2WtdHCM-gzGzoHsz',
+    appKey: '9BrITJLcXcIXYLFft9DhURVH',
+    placeholder: 'ヾﾉ≧∀≦)o 来呀！快活呀！~',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+</script>
+
+
+
+
+  
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

